@@ -243,8 +243,8 @@ enum PubNub_BH PubNub::_request_bh(EthernetClient &client, unsigned long t_start
 				WAIT();
 				ch = client.read();
 				line[linelen++] = ch;
-				if (linelen == sizeof(chunked_str)
-				    && !strncasecmp(line, chunked_str, linelen)) {
+				if (linelen == strlen(chunked_str)
+				    && !strncasecmp(line, chunked_str, strlen(chunked_str))) {
 					/* Chunked encoding header. */
 					chunked = true;
 					break;
