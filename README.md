@@ -1,13 +1,14 @@
-PubNub Arduino Library
-======================
+#PubNub Arduino Library
 
 This library allows your sketches to communicate with the PubNub cloud
 message passing system using an Ethernet shield. Your application can
 receive and send messages.
 
+##Copy-and-Paste-Ready Code!
+See how easy it is to [Publish](examples/PubNubPublisher) and [Subscribe](examples/PubNubSubscriber)!
 
-Synopsis
-========
+###Synopsis
+
 
 	void setup() {
 		Serial.begin(9600);
@@ -40,13 +41,9 @@ Synopsis
 		delay(10000);
 	}
 
-See also included examples.
-
-Library Reference
-=================
+##Library Reference
 
 ``bool PubNub.begin(char *publish_key, char *subscribe_key, char *origin)``
----------------------------------------------------------------------------
 
 To start using PubNub, use PubNub.begin().  This should be called after
 Ethernet.begin().
@@ -59,7 +56,6 @@ history requests each at once.
 The origin parameter is optional, defaulting to "pubsub.pubnub.com".
 
 ``EthernetClient *publish(char *channel, char *message, int timeout)``
----------------------------------------------------------
 
 Send a message (assumed to be well-formed JSON) to a given channel.
 
@@ -71,7 +67,6 @@ The timeout parameter is optional, defaulting to 305. See also
 a note about timeouts below.
 
 ``PubSubClient *subscribe(char *channel)``
-------------------------------------------
 
 Listen for a message on a given channel. The function will block
 and return when a message arrives. NULL is returned in case of error.
@@ -98,7 +93,6 @@ The timeout parameter is optional, defaulting to 305. See also
 a note about timeouts below.
 
 ``EthernetClient *history(char *channel, int limit, int timeout)``
------------------------------------------------------
 
 Receive list of the last messages published on the given channel.
 The limit argument is optional and defaults to 10.
@@ -106,15 +100,13 @@ The limit argument is optional and defaults to 10.
 The timeout parameter is optional, defaulting to 305. See also
 a note about timeouts below.
 
-Installation
-============
+##Installation
 
-Move the contents of the ``pubnub-api/arduino/`` directory to
+Move the contents of the ``pubnub/arduino/`` directory to
 ``~/sketchbook/libraries/PubNub/`` and restart your Arduino IDE.
 Try out the examples!
 
-Notes
-=====
+##Notes
 
 * There is no SSL support on Arduino, it is unfeasible with
 Arduino Uno or even Arduino Mega's computing power and memory limits.
