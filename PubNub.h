@@ -60,7 +60,7 @@ public:
 
 	/* Block until data is available. Returns false in case the
 	 * connection goes down or timeout expires. */
-	bool wait_for_data(int timeout = 305);
+	bool wait_for_data(int timeout = 310);
 
 	/* Enable the JSON state machine. */
 	void start_body();
