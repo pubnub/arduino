@@ -126,12 +126,6 @@ waste precious RAM by pre-allocating buffers that are never needed.
 a bug in Debian's version of Arduino pertaining the DNS code. Try using
 an IP address as origin and/or upgrading your Arduino package.
 
-* We assume that server replies always use Transfer-encoding: chunked;
-adding auto-detection would be straightforward if that ever changes.
-Adding support for multiple chunks is going to be possible, not so
-trivial though if we are to shield the user application from chunked
-encoding. Note that /history still uses non-chunked encoding.
-
 * The optional timeout parameter allows you to specify a timeout
 period after which the subscribe call shall be retried. Note
 that this timeout is applied only for reading response, not for
