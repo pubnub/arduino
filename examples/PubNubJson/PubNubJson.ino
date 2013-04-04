@@ -28,21 +28,21 @@
 
 // Some Ethernet shields have a MAC address printed on a sticker on the shield;
 // fill in that address here, or choose your own at random:
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+const static byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
 IPAddress myI(10, 42, 0, 2);
 IPAddress dnsI(8, 8, 8, 8);
 
-char pubkey[] = "demo";
-char subkey[] = "demo";
-char channel[] = "hello_world";
+const static char pubkey[] = "demo";
+const static char subkey[] = "demo";
+const static char channel[] = "hello_world";
 
 void setup()
 {
 	Serial.begin(9600);
 	Serial.println("Serial set up");
 
-	Ethernet.begin(mac, myI, dnsI);
+	Ethernet.begin((byte*) mac, myI, dnsI);
 	Serial.println("Ethernet set up");
 
 	PubNub.begin(pubkey, subkey);
