@@ -1,3 +1,4 @@
+#include <avr/pgmspace.h>
 #include <ctype.h>
 #include <Ethernet.h>
 #include "PubNub.h"
@@ -235,7 +236,7 @@ enum PubNub_BH PubNub::_request_bh(EthernetClient &client, unsigned long t_start
 		} else { /* request_state == RS_LOADLINE */
 			/* line[] must be enough to hold
 			 * Transfer-Encoding: chunked (or \r\n) */
-			const static char chunked_str[] = "Transfer-Encoding: chunked\r\n";
+			const static char PROGMEM chunked_str[] = "Transfer-Encoding: chunked\r\n";
 			char line[sizeof(chunked_str)]; /* Not NUL-terminated! */
 			int linelen = 0;
 			char ch = 0;
@@ -243,8 +244,8 @@ enum PubNub_BH PubNub::_request_bh(EthernetClient &client, unsigned long t_start
 				WAIT();
 				ch = client.read();
 				line[linelen++] = ch;
-				if (linelen == strlen(chunked_str)
-				    && !strncasecmp(line, chunked_str, strlen(chunked_str))) {
+				if (linelen == strlen_P(chunked_str)
+				    && !strncasecmp_P(line, chunked_str, linelen)) {
 					/* Chunked encoding header. */
 					chunked = true;
 					break;
