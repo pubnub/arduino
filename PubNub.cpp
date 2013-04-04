@@ -14,14 +14,14 @@
 
 class PubNub PubNub;
 
-bool PubNub::begin(char *publish_key_, char *subscribe_key_, char *origin_)
+bool PubNub::begin(const char *publish_key_, const char *subscribe_key_, const char *origin_)
 {
 	publish_key = publish_key_;
 	subscribe_key = subscribe_key_;
 	origin = origin_;
 }
 
-EthernetClient *PubNub::publish(char *channel, char *message, int timeout)
+EthernetClient *PubNub::publish(const char *channel, const char *message, int timeout)
 {
 	EthernetClient &client = publish_client;
 	unsigned long t_start;
@@ -47,7 +47,7 @@ retry:
 	/* Inject message, URI-escaping it in the process.
 	 * We are careful to save RAM by not using any copies
 	 * of the string or explicit buffers. */
-	char *pmessage = message;
+	const char *pmessage = message;
 	while (pmessage[0]) {
 		/* RFC 3986 Unreserved characters plus few
 		 * safe reserved ones. */
@@ -83,7 +83,7 @@ retry:
 	}
 }
 
-PubSubClient *PubNub::subscribe(char *channel, int timeout)
+PubSubClient *PubNub::subscribe(const char *channel, int timeout)
 {
 	PubSubClient &client = subscribe_client;
 	unsigned long t_start;
@@ -138,7 +138,7 @@ retry:
 	}
 }
 
-EthernetClient *PubNub::history(char *channel, int limit, int timeout)
+EthernetClient *PubNub::history(const char *channel, int limit, int timeout)
 {
 	EthernetClient &client = history_client;
 	unsigned long t_start;

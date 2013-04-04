@@ -102,7 +102,7 @@ public:
 	 * @param string subscribe_key required key to receive messages.
 	 * @param string origin optional setting for cloud origin.
 	 * @return boolean whether begin() was successful. */
-	bool begin(char *publish_key, char *subscribe_key, char *origin = "pubsub.pubnub.com");
+	bool begin(const char *publish_key, const char *subscribe_key, const char *origin = "pubsub.pubnub.com");
 
 	/* Publish
 	 *
@@ -126,7 +126,7 @@ public:
 	 * @param string message required message string in JSON format.
 	 * @param string timeout optional timeout in seconds.
 	 * @return string Stream-ish object with reply message or NULL on error. */
-	EthernetClient *publish(char *channel, char *message, int timeout = 30);
+	EthernetClient *publish(const char *channel, const char *message, int timeout = 30);
 
 	/**
 	 * Subscribe
@@ -145,7 +145,7 @@ public:
 	 * @param string channel required channel name.
 	 * @param string timeout optional timeout in seconds.
 	 * @return string Stream-ish object with reply message or NULL on error. */
-	PubSubClient *subscribe(char *channel, int timeout = 310);
+	PubSubClient *subscribe(const char *channel, int timeout = 310);
 
 	/**
 	 * History
@@ -156,13 +156,13 @@ public:
 	 * @param int limit optional number of messages to retrieve.
 	 * @param string timeout optional timeout in seconds.
 	 * @return string Stream-ish object with reply message or NULL on error. */
-	EthernetClient *history(char *channel, int limit = 10, int timeout = 310);
+	EthernetClient *history(const char *channel, int limit = 10, int timeout = 310);
 
 private:
 	enum PubNub_BH _request_bh(EthernetClient &client, unsigned long t_start, int timeout);
 
-	char *publish_key, *subscribe_key;
-	char *origin;
+	const char *publish_key, *subscribe_key;
+	const char *origin;
 
 	EthernetClient publish_client, history_client;
 	PubSubClient subscribe_client;
