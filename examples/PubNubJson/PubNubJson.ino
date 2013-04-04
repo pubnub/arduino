@@ -146,6 +146,11 @@ void loop()
 	aJsonObject *msg = createMessage();
 	char *msgStr = aJson.print(msg);
 	aJson.deleteItem(msg);
+
+	// msgStr is returned in a buffer that can be potentially
+	// needlessly large; this call will "tighten" it
+	msgStr = (char *) realloc(msgStr, strlen(msgStr) + 1);
+
 	Serial.println(msgStr);
 	client = PubNub.publish(channel, msgStr);
 	free(msgStr);
