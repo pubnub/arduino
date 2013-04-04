@@ -14,6 +14,29 @@
   * (Optional) Analog sensors attached to analog pin.
   * (Optional) LEDs to be dimmed attached to PWM pins 8 and 9.
 
+
+  Note that due to use of the aJSON library, this sketch is more memory
+  sensitive than the others. In order to be able to use it on the boards
+  based on ATMega328, some special care is needed. Memory saving tips:
+
+  (i) Remove myI, dnsI from the sketch unless you need them.
+
+  (ii) In the aJSON library's utility/stringbuffer.c, change BUFFER_SIZE
+  from 256 to 128 or less. Note that this will limit the length of JSON
+  messages your script will be able to process.
+
+  (iii) In the file hardware/arduino/cores/arduino/HardwareSerial.cpp
+  which is part of your Arduino installation, decrease SERIAL_BUFFER_SIZE
+  from 64 to 16 or even smaller value (depends on your Serial usage).
+
+  Usually, (i) and (ii) is enough; try (iii) if you can't do one of these.
+  If you are still short on memory (will manifest as connection error,
+  there will be not enough memory left for EthernetClient), some very
+  aggressive code changes would be required, or re-consider whether you
+  cannot write ad-hoc JSON generating/parsing code covering just your
+  particular scenario instead of using the generic aJSON library.
+
+
   created 26 October 2012
   by Petr Baudis
 
@@ -30,6 +53,8 @@
 // fill in that address here, or choose your own at random:
 const static byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
+// Memory saving tip: remove myI and dnsI from your sketch if you
+// are content to rely on DHCP autoconfiguration.
 IPAddress myI(10, 42, 0, 2);
 IPAddress dnsI(8, 8, 8, 8);
 
