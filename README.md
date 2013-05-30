@@ -106,6 +106,18 @@ Move the contents of the ``pubnub/arduino/`` directory to
 ``~/sketchbook/libraries/PubNub/`` and restart your Arduino IDE.
 Try out the examples!
 
+##WiFi Shield Support
+
+The PubNub library supports the WiFi shield as well. In order
+to use the library with a WiFi-enabled Arduino, you will need
+to edit the file PubNub.h, commenting out the line
+
+	//#define PubNub_Ethernet
+
+and uncommenting
+
+	#define PubNub_WiFi
+
 ##Notes
 
 * There is no SSL support on Arduino, it is unfeasible with
@@ -133,3 +145,11 @@ connecting or sending data; use retransmission parameters of
 the Ethernet library to tune this. As a rule of thumb, timeout
 smaller than 30 seconds may still block longer with flaky
 network. Default server-side timeout of PubNub API is 300s.
+
+* If some of the PubNub calls fail with your WiFi shield (e.g. you
+see "subscribe error" and similar messages in serial console), your
+WiFi shield firmware may be buggy - e.g. a WiFi shield bought
+commercially in May 2013 had a firmware that had to be upgaded.
+This is not so difficult to do, simply follow:
+
+	http://arduino.cc/en/Hacking/WiFiShieldFirmwareUpgrading

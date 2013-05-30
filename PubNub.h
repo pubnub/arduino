@@ -53,6 +53,14 @@
  * the Ethernet library to tune this. As a rule of thumb, timeout
  * smaller than 30 seconds may still block longer with flaky
  * network. Default server-side timeout of PubNub API is 300s.
+ *
+ * (vi) If some of the PubNub calls fail with your WiFi shield (e.g. you
+ * see "subscribe error" and similar messages in serial console), your
+ * WiFi shield firmware may be buggy - e.g. a WiFi shield bought
+ * commercially in May 2013 had a firmware that had to be upgaded.
+ * This is not so difficult to do, simply follow:
+ *
+ * 	http://arduino.cc/en/Hacking/WiFiShieldFirmwareUpgrading
  */
 
 
