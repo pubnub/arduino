@@ -12,6 +12,20 @@
 #define DBGprintln(x...)
 #endif
 
+/* There are some special considerations when using the WiFi libary,
+ * compared to the Ethernet library:
+ *
+ * (i) The client object may return stale data from previous connection,
+ * so we should call .flush() after initiating a connection.
+ *
+ * (ii) It appears .stop() does not block on really terminating
+ * the connection, do that manually.
+ *
+ * (iii) Data may still be available while connected() returns false
+ * already; use available() test on a lot of places where we used
+ * connected() before.
+ */
+
 class PubNub PubNub;
 
 bool PubNub::begin(const char *publish_key_, const char *subscribe_key_, const char *origin_)
@@ -36,6 +50,7 @@ retry:
 		return NULL;
 	}
 
+	client.flush();
 	client.print("GET /publish/");
 	client.print(publish_key);
 	client.print("/");
@@ -75,10 +90,12 @@ retry:
 	case PubNub_BH_ERROR:
 		/* Failure. */
 		client.stop();
+		while (client.connected()) ;
 		return NULL;
 	case PubNub_BH_TIMEOUT:
 		/* Time out. Try again. */
 		client.stop();
+		while (client.connected()) ;
 		goto retry;
 	}
 }
@@ -98,6 +115,7 @@ retry:
 		return NULL;
 	}
 
+	client.flush();
 	client.print("GET /subscribe/");
 	client.print(subscribe_key);
 	client.print("/");
@@ -112,11 +130,11 @@ retry:
 		 * as our API contract is to return only the "message body"
 		 * part of reply from subscribe. */
 		if (!client.wait_for_data()
-		    || !client.connected()
 		    || client.read() != '[') {
 			/* Something unexpected. */
 			DBGprintln("Unexpected body in subscribe");
 			client.stop();
+			while (client.connected()) ;
 			return NULL;
 		}
 		/* Now return handle to the client for further perusal.
@@ -129,11 +147,13 @@ retry:
 	case PubNub_BH_ERROR:
 		/* Failure. */
 		client.stop();
+		while (client.connected()) ;
 		return NULL;
 
 	case PubNub_BH_TIMEOUT:
 		/* Time out. Try again. */
 		client.stop();
+		while (client.connected()) ;
 		goto retry;
 	}
 }
@@ -151,6 +171,7 @@ retry:
 		return NULL;
 	}
 
+	client.flush();
 	client.print("GET /history/");
 	client.print(subscribe_key);
 	client.print("/");
@@ -167,10 +188,12 @@ retry:
 	case PubNub_BH_ERROR:
 		/* Failure. */
 		client.stop();
+		while (client.connected()) ;
 		return NULL;
 	case PubNub_BH_TIMEOUT:
 		/* Time out. Try again. */
 		client.stop();
+		while (client.connected()) ;
 		goto retry;
 	}
 }
@@ -185,17 +208,17 @@ enum PubNub_BH PubNub::_request_bh(PubNub_BASE_CLIENT &client, unsigned long t_s
 	client.print("\r\nUser-Agent: PubNub-Arduino/1.0\r\nConnection: close\r\n\r\n");
 
 #define WAIT() do { \
-	while (client.connected() && !client.available()) { \
+	while (!client.available()) { \
 		/* wait, just check for timeout */ \
 		if (millis() - t_start > (unsigned long) timeout * 1000) { \
 			DBGprintln("Timeout in bottom half"); \
 			return PubNub_BH_TIMEOUT; \
 		} \
-	} \
-	if (!client.connected()) { \
-		/* Oops, connection interrupted. */ \
-		DBGprintln("Connection reset in bottom half"); \
-		return PubNub_BH_ERROR; \
+		if (!client.connected()) { \
+			/* Oops, connection interrupted. */ \
+			DBGprintln("Connection reset in bottom half"); \
+			return PubNub_BH_ERROR; \
+		} \
 	} \
 } while (0)
 
@@ -224,7 +247,7 @@ enum PubNub_BH PubNub::_request_bh(PubNub_BASE_CLIENT &client, unsigned long t_s
 	} request_state = RS_SKIPLINE; /* Skip the rest of status line first. */
 	bool chunked = false;
 
-	while (client.connected()) {
+	while (client.connected() || client.available()) {
 		/* Let's hope there is no stray LF without CR. */
 		if (request_state == RS_SKIPLINE) {
 			do {
@@ -292,7 +315,7 @@ int PubSubClient::read(uint8_t *buf, size_t size)
 		return len;
 	for (int i = 0; i < len; i++) {
 		this->_state_input(buf[i], &buf[i+1], len - i - 1);
-		if (!connected()) {
+		if (!available() && !connected()) {
 			/* We have hit the end somewhere in this buffer.
 			 * From user perspective, only characters up to
 			 * index i are valid. */
@@ -309,7 +332,7 @@ bool PubSubClient::wait_for_data(int timeout)
 		if (millis() - t_start > (unsigned long) timeout * 1000)
 			return false; /* Time out. */
 	}
-	return connected();
+	return available();
 }
 
 void PubSubClient::stop()
