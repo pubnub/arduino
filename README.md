@@ -153,3 +153,10 @@ commercially in May 2013 had a firmware that had to be upgaded.
 This is not so difficult to do, simply follow:
 
 	http://arduino.cc/en/Hacking/WiFiShieldFirmwareUpgrading
+
+* The vendor firmware for the WiFi shield has dubious TCP implementation;
+for example, TCP ports of outgoing connections are always chosen from the
+same sequence, so if you reset your Arduino, some of the new connections
+may interfere with an outstanding TCP connection that has not been closed
+before the reset; i.e. you will typically see a single failed request
+somewhere down the road after a reset.
