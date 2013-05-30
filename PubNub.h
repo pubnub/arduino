@@ -1,8 +1,29 @@
 #ifndef PubNub_h
 #define PubNub_h
 
+
 #include <stdint.h>
+
+
+/* By default, the PubNub library is built to work with the Ethernet
+ * shield. WiFi shield support can be enabled by commenting the
+ * following line and commenting out the line after that. Refer
+ * to the PubNubJsonWifi sketch for a complete example. */
+#define PubNub_Ethernet
+//#define PubNub_WiFi
+
+
+#if defined(PubNub_Ethernet)
 #include <Ethernet.h>
+#define PubNub_BASE_CLIENT EthernetClient
+
+#elif defined(PubNub_WiFi)
+#include <WiFi.h>
+#define PubNub_BASE_CLIENT WiFiClient
+
+#else
+#error PubNub_BASE_CLIENT set to an invalid value!
+#endif
 
 
 /* Some notes:
@@ -43,10 +64,10 @@
  * As soon as the body ends, PubSubclient reads the rest of HTTP reply
  * itself and disconnects. The stored timetoken is used in the next call
  * to the PubSub::subscribe method then. */
-class PubSubClient : public EthernetClient {
+class PubSubClient : public PubNub_BASE_CLIENT {
 public:
 	PubSubClient() :
-		EthernetClient(), json_enabled(false)
+		PubNub_BASE_CLIENT(), json_enabled(false)
 	{
 		strcpy(timetoken, "0");
 	}
@@ -122,11 +143,14 @@ public:
 	 * skipped inside the function. If you do not care about
 	 * the reply, just call client->stop(); immediately.
 	 *
+	 * It returns an object that is typically EthernetClient (but it
+	 * can be a WiFiClient if you enabled the WiFi shield).
+	 *
 	 * @param string channel required channel name.
 	 * @param string message required message string in JSON format.
 	 * @param string timeout optional timeout in seconds.
 	 * @return string Stream-ish object with reply message or NULL on error. */
-	EthernetClient *publish(const char *channel, const char *message, int timeout = 30);
+	PubNub_BASE_CLIENT *publish(const char *channel, const char *message, int timeout = 30);
 
 	/**
 	 * Subscribe
@@ -156,15 +180,15 @@ public:
 	 * @param int limit optional number of messages to retrieve.
 	 * @param string timeout optional timeout in seconds.
 	 * @return string Stream-ish object with reply message or NULL on error. */
-	EthernetClient *history(const char *channel, int limit = 10, int timeout = 310);
+	PubNub_BASE_CLIENT *history(const char *channel, int limit = 10, int timeout = 310);
 
 private:
-	enum PubNub_BH _request_bh(EthernetClient &client, unsigned long t_start, int timeout);
+	enum PubNub_BH _request_bh(PubNub_BASE_CLIENT &client, unsigned long t_start, int timeout);
 
 	const char *publish_key, *subscribe_key;
 	const char *origin;
 
-	EthernetClient publish_client, history_client;
+	PubNub_BASE_CLIENT publish_client, history_client;
 	PubSubClient subscribe_client;
 };
 

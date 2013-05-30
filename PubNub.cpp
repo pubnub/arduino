@@ -1,6 +1,5 @@
 #include <avr/pgmspace.h>
 #include <ctype.h>
-#include <Ethernet.h>
 #include "PubNub.h"
 
 // #define PUBNUB_DEBUG 1
@@ -22,9 +21,9 @@ bool PubNub::begin(const char *publish_key_, const char *subscribe_key_, const c
 	origin = origin_;
 }
 
-EthernetClient *PubNub::publish(const char *channel, const char *message, int timeout)
+PubNub_BASE_CLIENT *PubNub::publish(const char *channel, const char *message, int timeout)
 {
-	EthernetClient &client = publish_client;
+	PubNub_BASE_CLIENT &client = publish_client;
 	unsigned long t_start;
 
 retry:
@@ -139,9 +138,9 @@ retry:
 	}
 }
 
-EthernetClient *PubNub::history(const char *channel, int limit, int timeout)
+PubNub_BASE_CLIENT *PubNub::history(const char *channel, int limit, int timeout)
 {
-	EthernetClient &client = history_client;
+	PubNub_BASE_CLIENT &client = history_client;
 	unsigned long t_start;
 
 retry:
@@ -176,7 +175,7 @@ retry:
 	}
 }
 
-enum PubNub_BH PubNub::_request_bh(EthernetClient &client, unsigned long t_start, int timeout)
+enum PubNub_BH PubNub::_request_bh(PubNub_BASE_CLIENT &client, unsigned long t_start, int timeout)
 {
 	/* Finish the first line of the request. */
 	client.print(" HTTP/1.1\r\n");
@@ -278,7 +277,7 @@ enum PubNub_BH PubNub::_request_bh(EthernetClient &client, unsigned long t_start
 
 int PubSubClient::read()
 {
-	int c = EthernetClient::read();
+	int c = PubNub_BASE_CLIENT::read();
 	if (!json_enabled || c == -1)
 		return c;
 
@@ -288,7 +287,7 @@ int PubSubClient::read()
 
 int PubSubClient::read(uint8_t *buf, size_t size)
 {
-	int len = EthernetClient::read(buf, size);
+	int len = PubNub_BASE_CLIENT::read(buf, size);
 	if (!json_enabled || len <= 0)
 		return len;
 	for (int i = 0; i < len; i++) {
@@ -315,8 +314,8 @@ bool PubSubClient::wait_for_data(int timeout)
 
 void PubSubClient::stop()
 {
-	if (!connected() || !json_enabled) {
-		EthernetClient::stop();
+	if ((!available() && !connected()) || !json_enabled) {
+		PubNub_BASE_CLIENT::stop();
 		return;
 	}
 	/* We are still connected. Read the rest of the stream so that
