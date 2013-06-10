@@ -68,6 +68,10 @@
  * may interfere with an outstanding TCP connection that has not been closed
  * before the reset; i.e. you will typically see a single failed request
  * somewhere down the road after a reset.
+ *
+ * (viii) It is essential to use a new enough Arduino version so that
+ * the WiFi library actually works properly. Most notably, version 1.0.5
+ * has been confirmed to work while Arduino 1.0.4 is broken.
  */
 
 
