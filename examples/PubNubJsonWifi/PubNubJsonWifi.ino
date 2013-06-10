@@ -138,11 +138,6 @@ void dumpMessage(Stream &s, aJsonObject *msg)
 		sender = aJson.getObjectItem(item, "sender");
 		if (!sender) { s.println("sender not acquired"); delay(1000); return; }
 
-		s.print(" mac_last_byte: ");
-		value = aJson.getObjectItem(sender, "mac_last_byte");
-		if (!value) { s.println("mac_last_byte not acquired"); delay(1000); return; }
-		s.print(value->valueint, DEC);
-
 		s.print(" A2: ");
 		analog = aJson.getObjectItem(item, "analog");
 		if (!analog) { s.println("analog not acquired"); delay(1000); return; }
