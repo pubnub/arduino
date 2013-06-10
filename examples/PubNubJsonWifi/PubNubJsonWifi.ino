@@ -105,14 +105,14 @@ void processPwmInfo(aJsonObject *item)
 		aJsonObject *pwmval = aJson.getObjectItem(pwm, pinstr);
 		if (!pwmval) continue; /* Value not provided, ok. */
 		if (pwmval->type != aJson_Int) {
-			Serial.print("invalid data type ");
+			Serial.print(" invalid data type ");
 			Serial.print(pwmval->type, DEC);
 			Serial.print(" for pin ");
 			Serial.println(pins[i], DEC);
 			continue;
 		}
 
-		Serial.print("setting pin ");
+		Serial.print(" setting pin ");
 		Serial.print(pins[i], DEC);
 		Serial.print(" to value ");
 		Serial.println(pwmval->valueint, DEC);
@@ -126,7 +126,7 @@ void dumpMessage(Stream &s, aJsonObject *msg)
 	for (int i = 0; i < msg_count; i++) {
 		aJsonObject *item, *sender, *analog, *value;
 		s.print("Msg #");
-		s.print(i, DEC);
+		s.println(i, DEC);
 
 		item = aJson.getArrayItem(msg, i);
 		if (!item) { s.println("item not acquired"); delay(1000); return; }
