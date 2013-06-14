@@ -106,6 +106,32 @@ Move the contents of the ``pubnub/arduino/`` directory to
 ``~/sketchbook/libraries/PubNub/`` and restart your Arduino IDE.
 Try out the examples!
 
+##Supported Hardware
+
+The Arduino ecosystem features a multitude of platforms that
+have significant differences regarding their hardware capabilities;
+here, we list the status of PubNub support for various platforms:
+
+  * ATMega168-based generic boards (Duemilanove, Diecimila...):
+Not supported due to too small RAM and flash memory size.
+  * ATMega328-based generic boards (Duemilanove, Uno), Arduino
+Ethernet: Supported.  The space for user code may be somewhat limited.
+When used with aJson library, some tweaks are required, see the top
+of the PubNubJson example.
+
+  * Arduino Mega (ATMega2560): Supported.
+  * Arduino Mega (ATMega1280): Untested, but should work just fine.
+
+Except Arduino Ethernet, network connectivity must be added by
+an external board ("shield"):
+
+  * Arduino Ethernet Shield: Supported. The shield must be based
+on the WizNet W5100 chip - this should be the case for all but some
+ancient ethernet shields.
+  * Arduino WiFi Shield: Supported with the newest firmware and
+software.  The support must be enabled in the PubNub library.
+Please see the "WiFi Shield Support" section for details.
+
 ##WiFi Shield Support
 
 The PubNub library supports the WiFi shield as well. In order
