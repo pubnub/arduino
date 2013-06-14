@@ -116,20 +116,20 @@ here, we list the status of PubNub support for various platforms:
 Not supported due to too small RAM and flash memory size.
   * ATMega328-based generic boards (Duemilanove, Uno), Arduino
 Ethernet: Supported.  The space for user code may be somewhat limited.
-When used with aJson library, some tweaks are required, see the top
-of the PubNubJson example.
+When using the aJson library, some memory saving tricks are required,
+see the top of the PubNubJson example.
 
   * Arduino Mega (ATMega2560): Supported.
   * Arduino Mega (ATMega1280): Untested, but should work just fine.
 
-Except Arduino Ethernet, network connectivity must be added by
+Except Arduino Ethernet, network connectivity is provided by
 an external board ("shield"):
 
-  * Arduino Ethernet Shield: Supported. The shield must be based
-on the WizNet W5100 chip - this should be the case for all but some
-ancient ethernet shields.
-  * Arduino WiFi Shield: Supported with the newest firmware and
-software.  The support must be enabled in the PubNub library.
+  * Arduino Ethernet Shield: Supported. We tested only a shield that
+is based on the WizNet W5100 chip - but this should be the case for
+all but some ancient non-official ethernet shields.
+  * Arduino WiFi Shield: Supported, but new enough firmware and software
+is required.  The support must be enabled in the PubNub library.
 Please see the "WiFi Shield Support" section for details.
 
 ##WiFi Shield Support
@@ -148,7 +148,7 @@ It is essential to use a new enough Arduino version so that
 the WiFi library actually works properly. Most notably, version 1.0.5
 has been confirmed to work while Arduino 1.0.4 is broken!
 
-The WiFi shield carries its own microcontroller dedicated to network
+The WiFi shield carries its own microcontroller dedicated to the network
 communication and this microcontroller has upgradeable firmware.
 If some of the PubNub calls fail with your WiFi shield (e.g. you
 see "subscribe error" and similar messages in serial console),
