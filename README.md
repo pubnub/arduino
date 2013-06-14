@@ -146,13 +146,15 @@ and uncommenting
 
 It is essential to use a new enough Arduino version so that
 the WiFi library actually works properly. Most notably, version 1.0.5
-has been confirmed to work while Arduino 1.0.4 is broken.
+has been confirmed to work while Arduino 1.0.4 is broken!
 
+The WiFi shield carries its own microcontroller dedicated to network
+communication and this microcontroller has upgradeable firmware.
 If some of the PubNub calls fail with your WiFi shield (e.g. you
-see "subscribe error" and similar messages in serial console), your
-WiFi shield firmware may be buggy - e.g. a WiFi shield bought
-commercially in May 2013 had a firmware that had to be upgaded.
-This is not so difficult to do, simply follow:
+see "subscribe error" and similar messages in serial console),
+the firmware loaded on your WiFi shield may be buggy - e.g. a WiFi
+shield bought commercially in May 2013 came preloaded with firmware
+that had to be upgraded.  This is not so difficult to do, simply follow:
 
 	http://arduino.cc/en/Hacking/WiFiShieldFirmwareUpgrading
 
