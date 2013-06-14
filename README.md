@@ -144,6 +144,18 @@ and uncommenting
 
 	#define PubNub_WiFi
 
+It is essential to use a new enough Arduino version so that
+the WiFi library actually works properly. Most notably, version 1.0.5
+has been confirmed to work while Arduino 1.0.4 is broken.
+
+If some of the PubNub calls fail with your WiFi shield (e.g. you
+see "subscribe error" and similar messages in serial console), your
+WiFi shield firmware may be buggy - e.g. a WiFi shield bought
+commercially in May 2013 had a firmware that had to be upgaded.
+This is not so difficult to do, simply follow:
+
+	http://arduino.cc/en/Hacking/WiFiShieldFirmwareUpgrading
+
 ##Notes
 
 * There is no SSL support on Arduino, it is unfeasible with
@@ -172,21 +184,9 @@ the Ethernet library to tune this. As a rule of thumb, timeout
 smaller than 30 seconds may still block longer with flaky
 network. Default server-side timeout of PubNub API is 300s.
 
-* If some of the PubNub calls fail with your WiFi shield (e.g. you
-see "subscribe error" and similar messages in serial console), your
-WiFi shield firmware may be buggy - e.g. a WiFi shield bought
-commercially in May 2013 had a firmware that had to be upgaded.
-This is not so difficult to do, simply follow:
-
-	http://arduino.cc/en/Hacking/WiFiShieldFirmwareUpgrading
-
 * The vendor firmware for the WiFi shield has dubious TCP implementation;
 for example, TCP ports of outgoing connections are always chosen from the
 same sequence, so if you reset your Arduino, some of the new connections
 may interfere with an outstanding TCP connection that has not been closed
 before the reset; i.e. you will typically see a single failed request
 somewhere down the road after a reset.
-
-* It is essential to use a new enough Arduino version so that
-the WiFi library actually works properly. Most notably, version 1.0.5
-has been confirmed to work while Arduino 1.0.4 is broken.
