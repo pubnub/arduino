@@ -144,6 +144,14 @@ public:
 	 * @return boolean whether begin() was successful. */
 	bool begin(const char *publish_key, const char *subscribe_key, const char *origin = "pubsub.pubnub.com");
 
+	/* Set the UUID identification of PubNub client. This is useful
+	 * e.g. for presence identification.
+	 *
+	 * Pass NULL to unset. The string is not copied over (just like
+	 * in begin()). See the PubNubSubscriber example for simple code
+	 * that generates a random UUID (although not 100% reliable). */
+	void set_uuid(const char *uuid);
+
 	/* Publish
 	 *
 	 * Send a message (assumed to be well-formed JSON) to a given channel.
@@ -206,6 +214,7 @@ private:
 
 	const char *publish_key, *subscribe_key;
 	const char *origin;
+	const char *uuid;
 
 	PubNub_BASE_CLIENT publish_client, history_client;
 	PubSubClient subscribe_client;

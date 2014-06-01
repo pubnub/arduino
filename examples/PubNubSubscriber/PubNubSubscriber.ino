@@ -2,11 +2,13 @@
   PubNub sample subscribe client
 
   This sample client will subscribe to and handle raw PubNub messages
-  (not doing any JSON decoding).
+  (not doing any JSON decoding).  It does so with a randomly generated
+  UUID.
 
   Circuit:
   * Ethernet shield attached to pins 10, 11, 12, 13
   * (Optional.) LED on pin 8 for reception indication.
+  * Pin A4 unconnected (noise source for random number generator)
 
   created 23 October 2012
   by Petr Baudis
@@ -28,6 +30,14 @@ const int subLedPin = 8;
 char pubkey[] = "demo";
 char subkey[] = "demo";
 char channel[] = "hello_world";
+char uuid[] = "xxxxxxxx-xxxx-4444-9999-xxxxxxxxxxxx";
+
+void random_uuid() {
+	randomSeed(analogRead(4) + millis() * 1024);
+	snprintf(uuid, sizeof(uuid), "%04lx%04lx-%04lx-4444-9999-%04lx%04lx%04lx",
+		random(0x10000), random(0x10000), random(0x10000),
+		random(0x10000), random(0x10000), random(0x10000));
+}
 
 void setup()
 {
@@ -44,6 +54,8 @@ void setup()
 	Serial.println("Ethernet set up");
 
 	PubNub.begin(pubkey, subkey);
+	random_uuid();
+	PubNub.set_uuid(uuid);
 	Serial.println("PubNub set up");
 }
 

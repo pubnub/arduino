@@ -33,6 +33,12 @@ bool PubNub::begin(const char *publish_key_, const char *subscribe_key_, const c
 	publish_key = publish_key_;
 	subscribe_key = subscribe_key_;
 	origin = origin_;
+	uuid = NULL;
+}
+
+void PubNub::set_uuid(const char *uuid_)
+{
+	uuid = uuid_;
 }
 
 PubNub_BASE_CLIENT *PubNub::publish(const char *channel, const char *message, int timeout)
@@ -122,6 +128,10 @@ retry:
 	client.print(channel);
 	client.print("/0/");
 	client.print(client.server_timetoken());
+	if (uuid) {
+		client.print("?uuid=");
+		client.print(uuid);
+	}
 
 	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout);
 	switch (ret) {
