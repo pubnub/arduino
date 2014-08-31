@@ -87,7 +87,7 @@ retry:
 		}
 	}
 
-	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout);
+	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, '?');
 	switch (ret) {
 	case PubNub_BH_OK:
 		/* Success and reached body, return handle to the client
@@ -133,7 +133,7 @@ retry:
 		client.print(uuid);
 	}
 
-	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout);
+	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, uuid ? '&' : '?');
 	switch (ret) {
 	case PubNub_BH_OK:
 		/* Success and reached body. We need to eat '[' first,
@@ -189,7 +189,7 @@ retry:
 	client.print("/0/");
 	client.print(limit, DEC);
 
-	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout);
+	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, '?');
 	switch (ret) {
 	case PubNub_BH_OK:
 		/* Success and reached body, return handle to the client
@@ -208,10 +208,11 @@ retry:
 	}
 }
 
-enum PubNub_BH PubNub::_request_bh(PubNub_BASE_CLIENT &client, unsigned long t_start, int timeout)
+enum PubNub_BH PubNub::_request_bh(PubNub_BASE_CLIENT &client, unsigned long t_start, int timeout, char qparsep)
 {
 	/* Finish the first line of the request. */
-	client.print(" HTTP/1.1\r\n");
+	client.print(qparsep);
+	client.print("pnsdk=PubNub-Arduino/1.0 HTTP/1.1\r\n");
 	/* Finish HTTP request. */
 	client.print("Host: ");
 	client.print(origin);

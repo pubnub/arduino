@@ -210,7 +210,7 @@ public:
 	PubNub_BASE_CLIENT *history(const char *channel, int limit = 10, int timeout = 310);
 
 private:
-	enum PubNub_BH _request_bh(PubNub_BASE_CLIENT &client, unsigned long t_start, int timeout);
+	enum PubNub_BH _request_bh(PubNub_BASE_CLIENT &client, unsigned long t_start, int timeout, char qparsep);
 
 	const char *publish_key, *subscribe_key;
 	const char *origin;
