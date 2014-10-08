@@ -1,4 +1,9 @@
+#if defined(__AVR)
 #include <avr/pgmspace.h>
+#else
+#define strncasecmp_P(a, b, c) strncasecmp(a, b, c)
+#endif
+
 #include <ctype.h>
 #include "PubNub.h"
 
