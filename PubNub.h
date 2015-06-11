@@ -152,6 +152,13 @@ public:
 	 * that generates a random UUID (although not 100% reliable). */
 	void set_uuid(const char *uuid);
 
+	/* Set the authorization key/token of PubNub client. This is useful
+	 * e.g. for access rights validation (PAM).
+	 *
+	 * Pass NULL to unset. The string is not copied over (just like
+	 * in begin()). */
+	void set_auth(const char *auth);
+
 	/* Publish
 	 *
 	 * Send a message (assumed to be well-formed JSON) to a given channel.
@@ -215,6 +222,7 @@ private:
 	const char *publish_key, *subscribe_key;
 	const char *origin;
 	const char *uuid;
+	const char *auth;
 
 	PubNub_BASE_CLIENT publish_client, history_client;
 	PubSubClient subscribe_client;
