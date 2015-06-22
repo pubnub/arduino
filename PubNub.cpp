@@ -39,6 +39,7 @@ bool PubNub::begin(const char *publish_key_, const char *subscribe_key_, const c
 	subscribe_key = subscribe_key_;
 	origin = origin_;
 	uuid = NULL;
+	auth = NULL;
 }
 
 void PubNub::set_uuid(const char *uuid_)
@@ -46,10 +47,16 @@ void PubNub::set_uuid(const char *uuid_)
 	uuid = uuid_;
 }
 
+void PubNub::set_auth(const char *auth_)
+{
+	auth = auth_;
+}
+
 PubNub_BASE_CLIENT *PubNub::publish(const char *channel, const char *message, int timeout)
 {
 	PubNub_BASE_CLIENT &client = publish_client;
 	unsigned long t_start;
+	int have_param = 0;
 
 retry:
 	t_start = millis();
@@ -92,7 +99,14 @@ retry:
 		}
 	}
 
-	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, '?');
+	if (auth) {
+		client.print(have_param ? '&' : '?');
+		client.print("auth=");
+		client.print(auth);
+		have_param = 1;
+	}
+	
+	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, have_param ? '&' : '?');
 	switch (ret) {
 	case PubNub_BH_OK:
 		/* Success and reached body, return handle to the client
@@ -115,6 +129,7 @@ PubSubClient *PubNub::subscribe(const char *channel, int timeout)
 {
 	PubSubClient &client = subscribe_client;
 	unsigned long t_start;
+	int have_param = 0;
 
 retry:
 	t_start = millis();
@@ -136,9 +151,16 @@ retry:
 	if (uuid) {
 		client.print("?uuid=");
 		client.print(uuid);
+		have_param = 1;
+	}
+	if (auth) {
+		client.print(have_param ? '&' : '?');
+		client.print("auth=");
+		client.print(auth);
+		have_param = 1;
 	}
 
-	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, uuid ? '&' : '?');
+	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, have_param ? '&' : '?');
 	switch (ret) {
 	case PubNub_BH_OK:
 		/* Success and reached body. We need to eat '[' first,
