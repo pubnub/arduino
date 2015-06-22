@@ -56,6 +56,7 @@ PubNub_BASE_CLIENT *PubNub::publish(const char *channel, const char *message, in
 {
 	PubNub_BASE_CLIENT &client = publish_client;
 	unsigned long t_start;
+	int have_param = 0;
 
 retry:
 	t_start = millis();
@@ -98,7 +99,14 @@ retry:
 		}
 	}
 
-	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, '?');
+	if (auth) {
+		client.print(have_param ? '&' : '?');
+		client.print("auth=");
+		client.print(auth);
+		have_param = 1;
+	}
+	
+	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, have_param ? '&' : '?');
 	switch (ret) {
 	case PubNub_BH_OK:
 		/* Success and reached body, return handle to the client
