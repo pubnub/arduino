@@ -158,6 +158,30 @@ that had to be upgraded.  This is not so difficult to do, simply follow:
 
 	http://arduino.cc/en/Hacking/WiFiShieldFirmwareUpgrading
 
+	
+## WiFi Shield Support for "WiFi Shield 101"
+
+If you are using [Arduino WiFi Shield 101](https://www.arduino.cc/en/Main/ArduinoWiFiShield101), use WiFi101 library, instead of the WiFi library.
+
+Download a zip from Download a [zipped WiFi101 library](https://github.com/arduino-libraries/WiFi101/releases)
+and import the lib.
+
+To enable it in PubNub Library, edit `PubNub.h`:
+
+Comment out
+
+	//#define PubNub_Ethernet
+
+and uncommente
+
+	#define PubNub_WiFi
+
+then add
+
+	#include <WiFi101.h>
+
+
+
 ##Notes
 
 * There is no SSL support on Arduino, it is unfeasible with
