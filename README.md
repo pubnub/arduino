@@ -168,19 +168,35 @@ and import the lib.
 
 To enable it in PubNub Library, edit `PubNub.h`:
 
-Comment out
+Comment out line 12:
 
 	//#define PubNub_Ethernet
 
-and uncommente
+and uncomment line 13:
 
 	#define PubNub_WiFi
 
-then add
+then at line 21, where it says `#include <WiFi.h>`, replace it with:
 
 	#include <WiFi101.h>
 
+Now the `#define PubNub_WiFi` block should look like:
 
+```c
+#define PubNub_WiFi
+
+#if defined(PubNub_Ethernet)
+#include <Ethernet.h>
+#define PubNub_BASE_CLIENT EthernetClient
+
+#elif defined(PubNub_WiFi)
+#include <WiFi101.h>
+#define PubNub_BASE_CLIENT WiFiClient
+
+#else
+#error PubNub_BASE_CLIENT set to an invalid value!
+#endif
+```
 
 ##Notes
 
