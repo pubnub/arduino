@@ -6,8 +6,8 @@
 
 
 /* By default, the PubNub library is built to work with the Ethernet
- * shield. WiFi shield support can be enabled by commenting the
- * following line and commenting out the line after that. Refer
+ * shield. WiFi shield support can be enabled by commenting out the
+ * following line and uncommenting the line after that. Refer
  * to the PubNubJsonWifi sketch for a complete example. */
 #define PubNub_Ethernet
 //#define PubNub_WiFi
