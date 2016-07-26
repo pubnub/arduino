@@ -11,6 +11,8 @@
  * to the PubNubJsonWifi sketch for a complete example. */
 #define PubNub_Ethernet
 //#define PubNub_WiFi
+//#define PubNub_Feather
+//#define PubNub_Particle
 
 
 #if defined(PubNub_Ethernet)
@@ -18,8 +20,16 @@
 #define PubNub_BASE_CLIENT EthernetClient
 
 #elif defined(PubNub_WiFi)
-#include <WiFi.h>
+#include <WiFi101.h>
 #define PubNub_BASE_CLIENT WiFiClient
+
+#elif defined(PubNub_Feather)
+#include <Adafruit_WINC1500.h>
+#define PubNub_BASE_CLIENT Adafruit_WINC1500Client
+
+#elif defined(PubNub_Particle)
+#include <Application.h>
+#define PubNub_BASE_CLIENT TCPClient
 
 #else
 #error PubNub_BASE_CLIENT set to an invalid value!
