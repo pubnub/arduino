@@ -131,6 +131,13 @@ all but some ancient non-official ethernet shields.
   * Arduino WiFi Shield: Supported, but new enough firmware and software
 is required.  The support must be enabled in the PubNub library.
 Please see the "WiFi Shield Support" section for details.
+  * Arduino Wifi101 Shield: Supported
+
+Keep in mind that some of these are support by libraries that are used
+with several Arduino-compatible boards (Adafruit Feather...) and this
+is not tested with all of them. If you find some board/shield that is
+compatbile with the above mentioned shield (uses the same Arduino library)
+and it doesn't work with Pubnub library, let us know.
 
 ##WiFi Shield Support
 
@@ -161,48 +168,31 @@ that had to be upgraded.  This is not so difficult to do, simply follow:
 	
 ## WiFi Shield Support for "WiFi Shield 101"
 
-If you are using [Arduino WiFi Shield 101](https://www.arduino.cc/en/Main/ArduinoWiFiShield101), use WiFi101 library, instead of the WiFi library.
-
-Download a zip from Download a [zipped WiFi101 library](https://github.com/arduino-libraries/WiFi101/releases)
-and import the lib.
+If you are using
+[Arduino WiFi Shield 101](https://www.arduino.cc/en/Main/ArduinoWiFiShield101),
+use WiFi101 library, instead of the WiFi library. The same library is used
+with some boards (Arduino MKR1000, Adafruit Feather M0 WINC1500...).
 
 To enable it in PubNub Library, edit `PubNub.h`:
 
-Comment out line 12:
+Comment out:
 
 	//#define PubNub_Ethernet
 
-and uncomment line 13:
+and uncomment
 
-	#define PubNub_WiFi
+	#define PubNub_WiFi101
 
-then at line 21, where it says `#include <WiFi.h>`, replace it with:
-
-	#include <WiFi101.h>
-
-Now the `#define PubNub_WiFi` block should look like:
-
-```c
-#define PubNub_WiFi
-
-#if defined(PubNub_Ethernet)
-#include <Ethernet.h>
-#define PubNub_BASE_CLIENT EthernetClient
-
-#elif defined(PubNub_WiFi)
-#include <WiFi101.h>
-#define PubNub_BASE_CLIENT WiFiClient
-
-#else
-#error PubNub_BASE_CLIENT set to an invalid value!
-#endif
-```
 
 ##Notes
 
 * There is no SSL support on Arduino, it is unfeasible with
 Arduino Uno or even Arduino Mega's computing power and memory limits.
 All the traffic goes on the wire unencrypted and unsigned.
+
+* Some newer Arduino (compatible) shields and boards do support SSL.
+Support for these SSL implementation is coming (but keep in mind that
+some of them are pretty tricky to use).
 
 * We re-resolve the origin server IP address before each request.
 This means some slow-down for intensive communication, but we rather

@@ -7,10 +7,13 @@
 
 /* By default, the PubNub library is built to work with the Ethernet
  * shield. WiFi shield support can be enabled by commenting out the
- * following line and uncommenting the line after that. Refer
+ * following line and uncommenting the line after that. The WiFi101
+ * shield support can be enable by commenting out the following
+ * line and uncommenting the second line below it. Refer
  * to the PubNubJsonWifi sketch for a complete example. */
 #define PubNub_Ethernet
 //#define PubNub_WiFi
+//#define PubNub_WiFi101
 
 
 #if defined(PubNub_Ethernet)
@@ -19,6 +22,10 @@
 
 #elif defined(PubNub_WiFi)
 #include <WiFi.h>
+#define PubNub_BASE_CLIENT WiFiClient
+
+#elif defined(PubNub_WiFi101)
+#include <WiFi101.h>
 #define PubNub_BASE_CLIENT WiFiClient
 
 #else
