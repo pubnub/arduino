@@ -1,3 +1,4 @@
+/* -*- c-file-style:"stroustrup"; indent-tabs-mode: nil -*- */
 #if defined(__AVR)
 #include <avr/pgmspace.h>
 #else
@@ -105,7 +106,7 @@ retry:
 		client.print(auth);
 		have_param = 1;
 	}
-	
+
 	enum PubNub_BH ret = this->_request_bh(client, t_start, timeout, have_param ? '&' : '?');
 	switch (ret) {
 	case PubNub_BH_OK:
@@ -366,11 +367,13 @@ int PubSubClient::read(uint8_t *buf, size_t size)
 bool PubSubClient::wait_for_data(int timeout)
 {
 	unsigned long t_start = millis();
-	while (connected() && !available()) {
-		if (millis() - t_start > (unsigned long) timeout * 1000)
-			return false; /* Time out. */
+	while (connected() && (0 == available())) {
+		if (millis() - t_start > (unsigned long) timeout * 1000) {
+			DBGprintln("wait_for_data() timeout");
+			return false;
+		}
 	}
-	return available();
+	return available() > 0;
 }
 
 void PubSubClient::stop()
@@ -432,7 +435,7 @@ void PubSubClient::_state_input(uint8_t ch, uint8_t *nextbuf, size_t nextsize)
 		case '}':
 		case ']':
 			braces_depth--;
-			if (braces_depth <= 0)
+			if (braces_depth == 0)
 				goto body_end;
 			return;
 		default:
@@ -448,34 +451,73 @@ body_end:
 
 void PubSubClient::_grab_timetoken(uint8_t *nextbuf, size_t nextsize)
 {
-	char new_timetoken[22];
-	size_t new_timetoken_len = 0;
+    char new_timetoken[22] = { '\0' };
+    size_t new_timetoken_len = 0;
+    unsigned long t_start = millis();
+    const unsigned long timeout = 310000UL;
+    
+    enum NTTState {
+        await_comma,
+        await_quote,
+        read_timetoken,
+        done
+    } state = await_comma;
+    
+    /* Expected followup now is:
+     * 	,"13511688131075270"]
+     */
+    while (state != done) {
+        uint8_t ch;
+        
+        if (millis() - t_start > timeout) {
+	    DBGprintln("Timeout while reading timetoken");
+	    return;
+        }
+        if (nextsize > 0) {
+	    ch = *nextbuf++;
+	    --nextsize;
+        }
+        else {
+	    if (0 == available()) {
+                if (!connected()) {
+                    DBGprintln("Lost connection while reading timetoken");
+                    return;
+                }
+                continue;
+	    }
+	    PubNub_BASE_CLIENT::read(&ch, sizeof ch);
+        }
 
-	/* Expected followup now is:
-	 * 	,"13511688131075270"]
-	 */
-	/* Somewhat unwieldy macros that will first exhaust nextbuf[],
-	 * then read directly from socket. */
-#define WAIT() do { \
-	if (nextsize > 0) \
-		break; \
-	if (!wait_for_data()) { \
-		/* Oops, connection interrupted. */ \
-		return; \
-	} \
-} while (0)
-#define GETCHAR() (nextsize > 0 ? (nextsize--, *nextbuf++) : read())
-	do { WAIT(); } while (GETCHAR() != ',');
-	do { WAIT(); } while (GETCHAR() != '"');
-	do {
-		WAIT();
-		char ch = GETCHAR();
-		if (ch == '"')
-			break;
-		new_timetoken[new_timetoken_len++] = ch;
-		if (new_timetoken_len >= sizeof(new_timetoken) - 1)
-			break;
-	} while (1);
-	memcpy(timetoken, new_timetoken, new_timetoken_len);
-	timetoken[new_timetoken_len] = 0;
+        switch (state) {
+        case await_comma:
+	    if (',' == ch) {
+                state = await_quote;
+	    }
+	    break;
+        case await_quote:
+	    if ('"' == ch) {
+                state = read_timetoken;
+	    }
+	    break;
+        case read_timetoken:
+            if (ch == '"') {
+                state = done;
+                break;
+            }
+            new_timetoken[new_timetoken_len++] = ch;
+            if (new_timetoken_len >= sizeof(new_timetoken) - 1) {
+                /* TODO: handle this as a kind of error */
+                state = done;
+                break;
+            }
+            break;
+        default:
+            break;
+	}
+    }
+
+    if (new_timetoken_len > 0) { 
+        memcpy(timetoken, new_timetoken, new_timetoken_len);
+    }
+    timetoken[new_timetoken_len] = 0;
 }
