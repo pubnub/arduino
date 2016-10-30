@@ -127,10 +127,21 @@ or newer).
 But, sometimes Arduino online repository for its Library manager takes
 time to update to new releases of Pubnub SDK, so, you might want to
 install it manually. To do so, download a release from
-[Arduino SDK on Github]`https://github.com/pubnub/arduino/` and move
+[Arduino SDK on Github](https://github.com/pubnub/arduino/) and move
 the contents to your Arduino libraries directory (on Linux, default
 would be: `~/sketchbook/libraries/PubNub/`) and restart your Arduino
 IDE.  Try out the examples!
+
+Keep in mind that if you both install the library via Arduino Library
+Manager _and_ manually, and the versions mismatch, Arduino IDE will
+issue warnings like:
+
+    Invalid version found: x.y.z
+
+Where `x.y.z` would be the version ID ofthe manually installed library.
+This is just a warning, the build and upload process is not impacted in
+any way by this.
+
 
 ##Supported Hardware
 
@@ -155,8 +166,8 @@ please let us know.
 For this to work, all you need to do is to include the Ethernet
 Shield Arduino library and start your sketch with:
 
-	#include <EthernetClient>
-	#include <Pubnub.h>
+    #include <EthernetClient>
+    #include <Pubnub.h>
 
 As `EthernetClient` is the default `Pubnub_BASE_CLIENT`.
 
@@ -176,16 +187,16 @@ library.
 
 So, for any WiFi101 compatible hardware, you would:
 
-	#include <WiFi101.h>
-	#define Pubnub_BASE_CLIENT WiFiClient
-	#include <Pubnub.h>
+    #include <WiFi101.h>
+    #define Pubnub_BASE_CLIENT WiFiClient
+    #include <Pubnub.h>
 
 For hadware that doesn't use WiFi101 library, but provides a
 `WiFiClient` class, like ESP8266, you would:
 
     #include <ESP8266WiFi.h>
-	#define Pubnub_BASE_CLIENT WiFiClient
-	#include <Pubnub.h>
+    #define Pubnub_BASE_CLIENT WiFiClient
+    #include <Pubnub.h>
 
 Of course, please keep in mind that you need to initialize your WiFi
 hardware, connect to a WiFi network and possibly do some maintenance,
@@ -199,46 +210,46 @@ that, it expects a working network.  We provide examples for some HW.
   more different files in you project, but only in one file. In all
   other source files (if you have them) `#include <PubNubDefs.h>`,
   which doesn't define the global `PubNub` object. This shouldn't be
-  much of an inconvenience, as most Arduino project have only one
+  much of an inconvenience, as most Arduino projects have only one
   file - the sketch itself.
 
 * We don't provide any SSL/TLS support, because of modest resource of
-most Arduino compatible boards. But, some shields/boards have SSL
-("Secure") clients and you may succeed in using them instead of the
-non-secure clients (say `WiFiClientSecure` instead of
-`WiFiClient`). How to do that depends on the specific hardware and
-library.
+  most Arduino compatible boards. But, some shields/boards have SSL
+  ("Secure") clients and you may succeed in using them instead of the
+  non-secure clients (say `WiFiClientSecure` instead of
+  `WiFiClient`). How to do that depends on the specific hardware and
+  library.
 
 * We re-resolve the origin server IP address before each request.
-This means some slow-down for intensive communication, but we rather
-expect light traffic and very long-running sketches (days, months),
-where refreshing the IP address is quite desirable.
+  This means some slow-down for intensive communication, but we rather
+  expect light traffic and very long-running sketches (days, months),
+  where refreshing the IP address is quite desirable.
 
 * We let the users read replies at their leisure instead of
-returning an already preloaded string so that (a) they can do that
-in loop() code while taking care of other things as well (b) we don't
-waste precious RAM by pre-allocating buffers that are never needed.
+  returning an already preloaded string so that (a) they can do that
+  in loop() code while taking care of other things as well (b) we don't
+  waste precious RAM by pre-allocating buffers that are never needed.
 
 * If you are having problems connecting, maybe you have hit
-a bug in Debian's version of Arduino pertaining the DNS code. Try using
-an IP address as origin and/or upgrading your Arduino package.
+  a bug in Debian's version of Arduino pertaining the DNS code. Try using
+  an IP address as origin and/or upgrading your Arduino package.
 
 * The optional timeout parameter allows you to specify a timeout
-period after which the subscribe call shall be retried. Note
-that this timeout is applied only for reading response, not for
-connecting or sending data; use retransmission parameters of
-the network library to tune this. As a rule of thumb, timeout
-smaller than 30 seconds may still block longer with flaky
-network. 
+  period after which the subscribe call shall be retried. Note
+  that this timeout is applied only for reading response, not for
+  connecting or sending data; use retransmission parameters of
+  the network library to tune this. As a rule of thumb, timeout
+  smaller than 30 seconds may still block longer with flaky
+  network. 
 
 * The vendor firmware for the WiFi shield has dubious TCP implementation;
-for example, TCP ports of outgoing connections are always chosen from the
-same sequence, so if you reset your Arduino, some of the new connections
-may interfere with an outstanding TCP connection that has not been closed
-before the reset; i.e. you will typically see a single failed request
-somewhere down the road after a reset.
+  for example, TCP ports of outgoing connections are always chosen from the
+  same sequence, so if you reset your Arduino, some of the new connections
+  may interfere with an outstanding TCP connection that has not been closed
+  before the reset; i.e. you will typically see a single failed request
+  somewhere down the road after a reset.
 
 * In general, there may be many issues with different shields and
-Arduino-compatible boards. A common issue is the firmware
-version. Please look to the available info on your shield and board
-for troubleshooting.
+  Arduino-compatible boards. A common issue is the firmware
+  version. Please look to the available info on your shield and board
+  for troubleshooting.
