@@ -1,11 +1,11 @@
 /*
   PubNub over WiFi Example using Adafruit Feather M0 WINC1500
-
-  Remember to `#define PubNub_WiFi101` in `PubNub.h`.
 */
   
 #include <SPI.h>
+
 #include <WiFi101.h>
+#define Pubnub_BASE_CLIENT WiFiClient
 #include <PubNub.h>
 
 static char ssid[] = "wifi_network_ssid";   // your network SSID (name)
@@ -15,7 +15,6 @@ int status = WL_IDLE_STATUS;                // the Wifi radio's status
 const static char pubkey[] = "demo";
 const static char subkey[] = "demo";
 const static char channel[] = "hello_world";
-
 
 void setup() {
   /* This is the only line of code that is Feather M0 WINC1500

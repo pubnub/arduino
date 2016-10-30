@@ -31,8 +31,11 @@
   */
 
 #include <SPI.h>
+
 #include <WiFi.h>
+#define Pubnub_BASE_CLIENT WiFiClient
 #include <PubNub.h>
+
 #include <aJSON.h>
 
 static char ssid[] = "yourNetwork";    // your network SSID (name)

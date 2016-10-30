@@ -1,7 +1,9 @@
 
 /*
-  PubNub over WiFi Example using WiFi Shield 101
-  This sample client will publish raw (string) PubNub messages from boards like Arduino Uno and Zero with WiFi Shield 101
+  PubNub over WiFi Example using WiFi Shield 101 
+
+  This sample client will publish raw (string) PubNub messages from
+  boards like Arduino Uno and Zero with WiFi Shield 101
   
   See https://www.arduino.cc/en/Reference/WiFi101 for more info 
   
@@ -10,7 +12,9 @@
 */
   
 #include <SPI.h>
+
 #include <WiFi101.h>
+#define Pubnub_BASE_CLIENT WiFiClient
 #include <PubNub.h>
 
 static char ssid[] = "your-wifi-network";   // your network SSID (name)

@@ -1,8 +1,10 @@
 #PubNub Arduino Library
 
 This library allows your sketches to communicate with the PubNub cloud
-message passing system using an Ethernet shield. Your application can
-receive and send messages.
+message passing system using an Ethernet shield or any other network
+hardware (chip/shield) that has a class compatible with Arduino de
+facto standard `EthernetClient`. Your application can receive and send
+messages.
 
 ##Copy-and-Paste-Ready Code!
 See how easy it is to [Publish](examples/PubNubPublisher) and [Subscribe](examples/PubNubSubscriber)!
@@ -11,16 +13,25 @@ See how easy it is to [Publish](examples/PubNubPublisher) and [Subscribe](exampl
 
 
 	void setup() {
+		/* For debugging, set to speed of your choice */
 		Serial.begin(9600);
+		
+		/* If you use some other HW, you need to do some other
+		   initialization of it here... */
 		Ethernet.begin(mac);
+
+	    /* Start the Pubnub library by giving it a publish and subscribe
+		   keys */
 		PubNub.begin(pubkey, subkey);
 	}
 
 	void loop() {
-		/* Maintain DHCP lease. */
+		/* Maintain DHCP lease. For other HW, you may need to do
+		   something else here, or maybe nothing at all. */
 		Ethernet.maintain();
 
-		/* Publish message. */
+		/* Publish message. To write portable code, change `EthernetClient`
+		   to `Pubnub_BASE_CLIENT`. */
 		EthernetClient *pclient = PubNub.publish(pubchannel, "\"message\"");
 		if (pclient)
 			pclient->stop();
@@ -45,8 +56,8 @@ See how easy it is to [Publish](examples/PubNubPublisher) and [Subscribe](exampl
 
 ``bool PubNub.begin(char *publish_key, char *subscribe_key, char *origin)``
 
-To start using PubNub, use PubNub.begin().  This should be called after
-Ethernet.begin().
+To start using PubNub, use PubNub.begin().  This should be called
+after initializing your network hardware (like `Ethernet.begin()`).
 
 Note that the string parameters are not copied; do not overwrite or free the
 memory where you stored the keys! (If you are passing string literals, don't
@@ -55,30 +66,34 @@ history requests each at once.
 
 The origin parameter is optional, defaulting to "pubsub.pubnub.com".
 
-``EthernetClient *publish(char *channel, char *message, int timeout)``
+``Pubnub_BASE_CLIENT *publish(char *channel, char *message, int timeout)``
 
 Send a message (assumed to be well-formed JSON) to a given channel.
 
-Returns NULL in case of error, instead an instance of EthernetClient
-that you can use to read the reply to the publish command. If you
-don't care about it, call ``client->stop()`` right away.
+Returns NULL in case of error, instead a pointer to an instance of
+`Pubnub_BASE_CLIENT` class that you can use to read the reply to the
+publish command. If you don't care about it, call ``client->stop()``
+right away. The default `Pubnub_BASE_CLIENT` is `EthernetClient`,
+and the second most used one is `WiFiClient`, but, _any_ compatible
+client class will do.
 
-The timeout parameter is optional, defaulting to 305. See also
-a note about timeouts below.
+The timeout parameter is optional, with a sensible default. See also a
+note about timeouts below.
 
 ``PubSubClient *subscribe(char *channel)``
 
-Listen for a message on a given channel. The function will block
-and return when a message arrives. NULL is returned in case of error.
-The return type is PubSubClient, but from user perspective, you can
-work with it exactly like with EthernetClient; it also provides
-an extra convenience method ``wait_for_data()`` that allows you
-to wait for more data with sensible timeout.
+Listen for a message on a given channel. The function will block and
+return when a message arrives. NULL is returned in case of error.  The
+return type is `PubSubClient`, which you can work with it exactly like
+with `EthernetClient`, but it also provides an extra convenience
+method ``wait_for_data()`` that allows you to wait for more data with
+sensible timeout.
 
-Typically, you will run this function from loop() function to keep
+Typically, you will run this function from `loop()` function to keep
 listening for messages indefinitely.
 
-As a reply, you will get a JSON array with messages, e.g.:
+As a reply, if all goes well, you will get a JSON array with messages,
+e.g.:
 
 ```
 	["msg1",{msg2:"x"}]
@@ -89,10 +104,10 @@ able to handle that. Note that the reply specifically does not
 include the time token present in the raw reply from PubNub;
 no need to worry about that.
 
-The timeout parameter is optional, defaulting to 305. See also
-a note about timeouts below.
+The timeout parameter is optional, with a sensible default. See also a
+note about timeouts below.
 
-``EthernetClient *history(char *channel, int limit, int timeout)``
+``Pubnub_BASE_CLIENT *history(char *channel, int limit, int timeout)``
 
 Receive list of the last messages published on the given channel.
 The limit argument is optional and defaults to 10.
@@ -100,99 +115,99 @@ The limit argument is optional and defaults to 10.
 The timeout parameter is optional, defaulting to 305. See also
 a note about timeouts below.
 
+This is not an officially supported API, it is there mostly for
+convinience for people that used it
+
 ##Installation
 
-Move the contents of the ``pubnub/arduino/`` directory to
-``~/sketchbook/libraries/PubNub/`` and restart your Arduino IDE.
-Try out the examples!
+Since version 1.1.1, Pubnub SDK is part of the Arduino Library
+Manager and you can use it directly from Arduino IDE (v 1.6.8
+or newer).
+
+But, sometimes Arduino online repository for its Library manager takes
+time to update to new releases of Pubnub SDK, so, you might want to
+install it manually. To do so, download a release from
+[Arduino SDK on Github]`https://github.com/pubnub/arduino/` and move
+the contents to your Arduino libraries directory (on Linux, default
+would be: `~/sketchbook/libraries/PubNub/`) and restart your Arduino
+IDE.  Try out the examples!
 
 ##Supported Hardware
 
+In general, the most widely available Arduino boards and shields are
+supported and tested. Any Arduino board that has networking hardware
+that supports an `EthernetClient` compatible class should work.
+
 The Arduino ecosystem features a multitude of platforms that
-have significant differences regarding their hardware capabilities;
-here, we list the status of PubNub support for various platforms:
+have significant differences regarding their hardware capabilities.
+Keeping up with all of them is next to impossible.
 
-  * ATMega168-based generic boards (Duemilanove, Diecimila...):
-Not supported due to too small RAM and flash memory size.
-  * ATMega328-based generic boards (Duemilanove, Uno), Arduino
-Ethernet: Supported.  The space for user code may be somewhat limited.
-When using the aJson library, some memory saving tricks are required,
-see the top of the PubNubJson example.
+If you find some Arduino board/shield that does provide an
+`EthernetClient` compatbile class and it doesn't work with Pubnub
+library, let us know.
 
-  * Arduino Mega (ATMega2560): Supported.
-  * Arduino Mega (ATMega1280): Untested, but should work just fine.
+Also, if you have some Arduino board/shield that doesn't provide an
+`EthernetClient` compatible class and you want to use Pubnub with it,
+please let us know.
 
-Except Arduino Ethernet, network connectivity is provided by
-an external board ("shield"):
+### Arduino Ethernet Shield
 
-  * Arduino Ethernet Shield: Supported. We tested only a shield that
-is based on the WizNet W5100 chip - but this should be the case for
-all but some ancient non-official ethernet shields.
-  * Arduino WiFi Shield: Supported, but new enough firmware and software
-is required.  The support must be enabled in the PubNub library.
-Please see the "WiFi Shield Support" section for details.
-  * Arduino Wifi101 Shield: Supported
+For this to work, all you need to do is to include the Ethernet
+Shield Arduino library and start your sketch with:
 
-Keep in mind that some of these are support by libraries that are used
-with several Arduino-compatible boards (Adafruit Feather...) and this
-is not tested with all of them. If you find some board/shield that is
-compatbile with the above mentioned shield (uses the same Arduino library)
-and it doesn't work with Pubnub library, let us know.
+	#include <EthernetClient>
+	#include <Pubnub.h>
 
-##WiFi Shield Support
+As `EthernetClient` is the default `Pubnub_BASE_CLIENT`.
 
-The PubNub library supports the WiFi shield as well. In order
-to use the library with a WiFi-enabled Arduino, you will need
-to edit the file PubNub.h, commenting out the line
-
-	//#define PubNub_Ethernet
-
-and uncommenting
-
-	#define PubNub_WiFi
-
-It is essential to use a new enough Arduino version so that
-the WiFi library actually works properly. Most notably, version 1.0.5
-has been confirmed to work while Arduino 1.0.4 is broken!
-
-The WiFi shield carries its own microcontroller dedicated to the network
-communication and this microcontroller has upgradeable firmware.
-If some of the PubNub calls fail with your WiFi shield (e.g. you
-see "subscribe error" and similar messages in serial console),
-the firmware loaded on your WiFi shield may be buggy - e.g. a WiFi
-shield bought commercially in May 2013 came preloaded with firmware
-that had to be upgraded.  This is not so difficult to do, simply follow:
-
-	http://arduino.cc/en/Hacking/WiFiShieldFirmwareUpgrading
+Of course, you also need to initialize the shield and do any
+maintenance (like DHCP lease).
 
 	
-## WiFi Shield Support for "WiFi Shield 101"
+### WiFi (Shield) Support
 
-If you are using
+Whether you are using the older WiFi shield or the
 [Arduino WiFi Shield 101](https://www.arduino.cc/en/Main/ArduinoWiFiShield101),
-use WiFi101 library, instead of the WiFi library. The same library is used
-with some boards (Arduino MKR1000, Adafruit Feather M0 WINC1500...).
+you will be using the `WiFiClient` class. Keep in mind that the
+WiFi101 library is used with other shields/boards (Arduino MKR1000,
+Adafruit Feather M0 WINC1500...) and that `WiFiClient` is the name
+of the client class for most Wifi hardware even if it uses another
+library.
 
-To enable it in PubNub Library, edit `PubNub.h`:
+So, for any WiFi101 compatible hardware, you would:
 
-Comment out:
+	#include <WiFi101.h>
+	#define Pubnub_BASE_CLIENT WiFiClient
+	#include <Pubnub.h>
 
-	//#define PubNub_Ethernet
+For hadware that doesn't use WiFi101 library, but provides a
+`WiFiClient` class, like ESP8266, you would:
 
-and uncomment
+    #include <ESP8266WiFi.h>
+	#define Pubnub_BASE_CLIENT WiFiClient
+	#include <Pubnub.h>
 
-	#define PubNub_WiFi101
-
+Of course, please keep in mind that you need to initialize your WiFi
+hardware, connect to a WiFi network and possibly do some maintenance,
+which is hardware specific. But, Pubnub SDK has nothing to do with
+that, it expects a working network.  We provide examples for some HW.
 
 ##Notes
 
-* There is no SSL support on Arduino, it is unfeasible with
-Arduino Uno or even Arduino Mega's computing power and memory limits.
-All the traffic goes on the wire unencrypted and unsigned.
+* If you `#include <PubNub.h>`, it will define the global `PubNub`
+  object in your code. Thus, you can't `#include <Pubnub.h>` in two or
+  more different files in you project, but only in one file. In all
+  other source files (if you have them) `#include <PubNubDefs.h>`,
+  which doesn't define the global `PubNub` object. This shouldn't be
+  much of an inconvenience, as most Arduino project have only one
+  file - the sketch itself.
 
-* Some newer Arduino (compatible) shields and boards do support SSL.
-Support for these SSL implementation is coming (but keep in mind that
-some of them are pretty tricky to use).
+* We don't provide any SSL/TLS support, because of modest resource of
+most Arduino compatible boards. But, some shields/boards have SSL
+("Secure") clients and you may succeed in using them instead of the
+non-secure clients (say `WiFiClientSecure` instead of
+`WiFiClient`). How to do that depends on the specific hardware and
+library.
 
 * We re-resolve the origin server IP address before each request.
 This means some slow-down for intensive communication, but we rather
@@ -212,9 +227,9 @@ an IP address as origin and/or upgrading your Arduino package.
 period after which the subscribe call shall be retried. Note
 that this timeout is applied only for reading response, not for
 connecting or sending data; use retransmission parameters of
-the Ethernet library to tune this. As a rule of thumb, timeout
+the network library to tune this. As a rule of thumb, timeout
 smaller than 30 seconds may still block longer with flaky
-network. Default server-side timeout of PubNub API is 300s.
+network. 
 
 * The vendor firmware for the WiFi shield has dubious TCP implementation;
 for example, TCP ports of outgoing connections are always chosen from the
@@ -222,3 +237,8 @@ same sequence, so if you reset your Arduino, some of the new connections
 may interfere with an outstanding TCP connection that has not been closed
 before the reset; i.e. you will typically see a single failed request
 somewhere down the road after a reset.
+
+* In general, there may be many issues with different shields and
+Arduino-compatible boards. A common issue is the firmware
+version. Please look to the available info on your shield and board
+for troubleshooting.
