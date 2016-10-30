@@ -622,7 +622,7 @@ inline enum PubNub::PubNub_BH PubNub::_request_bh(PubNub_BASE_CLIENT &client, un
     if (c != '2') {
         /* HTTP code that is NOT 2xx means trouble.
          * kthxbai */
-        DBGprint("Wrong HTTP status first digit ");
+        DBGprint("Wrong HTTP status first digit ASCII code: ");
         DBGprint((int) c, DEC);
         DBGprintln(" in bottom half");
         return PubNub_BH_ERROR;

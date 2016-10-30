@@ -47,7 +47,7 @@ void loop() {
 
   /* Publish */
   
-  char msg[] = "Hello world from Arduino for Adafruit Feather M0 WINC1500";
+  char msg[] = "\"Hello world from Arduino for Adafruit Feather M0 WINC1500\"";
   WiFiClient *client = PubNub.publish(channel, msg);
 
   if (!client) {
