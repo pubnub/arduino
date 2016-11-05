@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 #if !defined(PubNub_BASE_CLIENT)
