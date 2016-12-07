@@ -33,7 +33,7 @@
 #include <SPI.h>
 
 #include <WiFi.h>
-#define Pubnub_BASE_CLIENT WiFiClient
+#define PubNub_BASE_CLIENT WiFiClient
 #include <PubNub.h>
 
 #include <aJSON.h>
