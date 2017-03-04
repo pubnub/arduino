@@ -20,6 +20,39 @@
 #define DBGprintln(x...)
 #endif
 
+/* Under some board support libraries, like ESP8266,
+   the (de-facto) standard library functions are missing.
+   To use Pubnub library with those boards, you need to
+   define the following preprocessor macro-constant.
+   */
+#if defined(PUBNUB_DEFINE_STRSPN_AND_STRNCASECMP)
+inline size_t strspn(const char* cs, const char* ct) {
+    size_t n;
+    for (n=0; *cs; cs++, n++) {
+        const char* p;
+        for (p=ct; *p && *p != *cs; ++p) {
+            continue;
+        }
+        if (*p != '\0') {
+            break;
+        }
+    }
+    return n;
+}
+
+#include <ctype.h>
+inline int strncasecmp(const char *s1, const char *s2, size_t n) {
+    size_t i;
+    for (i = 0; i < n; ++i) {
+        const int diff = tolower(s1[i]) - tolower(s2[i]);
+        if ((diff != 0) || (s1[i] == '\0')) {
+            return diff;
+        }
+    }
+    return 0;
+}
+#endif
+
 
 /* This class is a thin #EthernetClient (in general, any class that
  * implements the Arduino #Client "interface") wrapper whose
