@@ -167,7 +167,7 @@ For this to work, all you need to do is to include the Ethernet
 Shield Arduino library and start your sketch with:
 
     #include <EthernetClient>
-    #include <Pubnub.h>
+    #include <PubNub.h>
 
 As `EthernetClient` is the default `Pubnub_BASE_CLIENT`.
 
@@ -188,20 +188,31 @@ library.
 So, for any WiFi101 compatible hardware, you would:
 
     #include <WiFi101.h>
-    #define Pubnub_BASE_CLIENT WiFiClient
-    #include <Pubnub.h>
+    #define PubNub_BASE_CLIENT WiFiClient
+    #include <PubNub.h>
 
 For hadware that doesn't use WiFi101 library, but provides a
 `WiFiClient` class, like ESP8266, you would:
 
     #include <ESP8266WiFi.h>
-    #define Pubnub_BASE_CLIENT WiFiClient
-    #include <Pubnub.h>
+    #define PubNub_BASE_CLIENT WiFiClient
+    #include <PubNub.h>
 
 Of course, please keep in mind that you need to initialize your WiFi
 hardware, connect to a WiFi network and possibly do some maintenance,
 which is hardware specific. But, Pubnub SDK has nothing to do with
 that, it expects a working network.  We provide examples for some HW.
+
+### ESP8266
+
+In previous section we already showed what to do to use ESP8266, but
+in most versions of ESP8266 support for Arduino, some of the (de-facto)
+standard library functions that we use are missing. To use our own
+implementation of them, `#define` a macro constant before you include 
+`Pubnub.h`, like this:
+
+    #define PUBNUB_DEFINE_STRSPN_AND_STRNCASECMP
+    #include <Pubnub.h>
 
 ##Notes
 
