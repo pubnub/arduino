@@ -682,7 +682,7 @@ inline enum PubNub::PubNub_BH PubNub::_request_bh(PubNub_BASE_CLIENT &client, un
         else { /* request_state == RS_LOADLINE */
             /* line[] must be enough to hold
              * Transfer-Encoding: chunked (or \r\n) */
-            const static char PROGMEM chunked_str[] = "Transfer-Encoding: chunked\r\n";
+            const static char chunked_str[] = "Transfer-Encoding: chunked\r\n";
             char line[sizeof(chunked_str)]; /* Not NUL-terminated! */
             int linelen = 0;
             char ch = 0;
