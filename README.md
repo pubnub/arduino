@@ -70,12 +70,22 @@ The origin parameter is optional, defaulting to "pubsub.pubnub.com".
 
 Send a message (assumed to be well-formed JSON) to a given channel.
 
-Returns NULL in case of error, instead a pointer to an instance of
+Returns `NULL` in case of error, instead a pointer to an instance of
 `Pubnub_BASE_CLIENT` class that you can use to read the reply to the
 publish command. If you don't care about it, call ``client->stop()``
 right away. The default `Pubnub_BASE_CLIENT` is `EthernetClient`,
 and the second most used one is `WiFiClient`, but, _any_ compatible
 client class will do.
+
+Since v2.1.0, if Pubnub responds with a HTTP status code indicating a
+failure, this will not return `NULL`. Of course, `NULL` will still be
+returned for other errors, like, DNS failure, network failure, etc.
+If you care, you should check the HTTP status code class, like:
+
+    if (PubNub.get_last_http_status_code_class() != PubNub::http_scc_success) {
+        Serial.print("Got HTTP status code error from PubNub, class: ");
+        Serial.print((int)PubNub.get_last_http_status_code_class(), DEC);
+	}
 
 The timeout parameter is optional, with a sensible default. See also a
 note about timeouts below.

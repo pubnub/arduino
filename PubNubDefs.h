@@ -62,7 +62,7 @@ inline int strncasecmp(const char *s1, const char *s2, size_t n) {
  * The user application sees only the JSON body, not the timetoken.
  * As soon as the body ends, PubSubclient reads the rest of HTTP reply
  * itself and disconnects. The stored timetoken is used in the next call
- * to the PubSub::subscribe method.
+ * to the PubNub::subscribe() method.
  */
 class PubSubClient : public PubNub_BASE_CLIENT {
 public:
@@ -174,12 +174,38 @@ public:
      * @return boolean whether begin() was successful.
      */
     bool begin(const char *publish_key, const char *subscribe_key, const char *origin = "pubsub.pubnub.com") {
-	d_publish_key = publish_key;
-	d_subscribe_key = subscribe_key;
-	d_origin = origin;
-	d_uuid = 0;
-	d_auth = 0;
+        d_publish_key = publish_key;
+        d_subscribe_key = subscribe_key;
+        d_origin = origin;
+        d_uuid = 0;
+        d_auth = 0;
+        d_last_http_status_code_class = http_scc_unknown;
     }
+
+    /**
+     * HTTP status code class. It is defined by the first digit of the
+     * HTTP status code.
+     * 
+     * @see RFC 7231 Section 6
+     */
+    enum http_status_code_class {
+        /** This is not defined in the RFC, we use it to indicate
+            "none/unknown" */
+        http_scc_unknown = 0,
+        /** The request was received, continuing process */
+        http_scc_informational = 1,
+        /** The request was successfully received, understood, and
+            accepted */
+        http_scc_success = 2,
+        /** Further action needs to be taken in order to complete the
+            request */
+        http_scc_redirection = 3,
+        /** The request contains bad syntax or cannot be fulfilled */
+        http_scc_client_error = 4,
+        /** The server failed to fulfill an apparently valid
+            request */
+        http_scc_server_error = 5
+    };
 
     /**
      * Set the UUID identification of PubNub client. This is useful
@@ -204,19 +230,25 @@ public:
     }
     
     /**
-     * Publish
-     *
-     * Send a message (assumed to be well-formed JSON) to a given channel.
+     * Publish/Send a message (assumed to be well-formed JSON) to a
+     * given channel.
      *
      * Note that the reply can be obtained using code like:
 
-         client = publish("demo", "\"lala\"");
-         if (!client) return; // error
+         client = PubNub.publish("demo", "\"lala\"");
+         if (!client) {
+             Serial.println("Failed to publish, got no response from PubNub");
+             return;
+         }
+         if (PubNub.get_last_http_status_code_class() != PubNub::http_scc_success) {
+             Serial.print("Got HTTP status code error from PubNub, class: ");
+             Serial.print((int)PubNub.get_last_http_status_code_class(), DEC);
+         }
          while (client->connected()) {
          // More sophisticated code will want to add timeout handling here
          while (client->connected() && !client->available()) ; // wait
              char c = client->read();
-              Serial.print(c);
+             Serial.print(c);
          }
          client->stop();
 
@@ -235,12 +267,10 @@ public:
     inline PubNub_BASE_CLIENT *publish(const char *channel, const char *message, int timeout = 30);
 
     /**
-     * Subscribe
-     *
-     * Listen for a message on a given channel. The function will block
-     * and return when a message arrives. Typically, you will run this
-     * function from loop() function to keep listening for messages
-     * indefinitely.
+     * Subscribe/Listen for a message on a given channel. The function
+     * will block and return when a message arrives. Typically, you
+     * will run this function from loop() function to keep listening
+     * for messages indefinitely.
      *
      * As a reply, you will get a JSON array with messages, e.g.:
      * 	["msg1",{msg2:"x"}]
@@ -265,6 +295,14 @@ public:
      * @return string Stream-ish object with reply message or 0 on error. */
     inline PubNub_BASE_CLIENT *history(const char *channel, int limit = 10, int timeout = 310);
 
+    /** Returns the HTTP status code class of the last PubNub
+        transaction. If the transaction failed without getting a
+        (HTTP) response, it will be "unknown".
+    */
+    inline http_status_code_class get_last_http_status_code_class() const {
+        return d_last_http_status_code_class;
+    }
+
 private:
     enum PubNub_BH {
         PubNub_BH_OK,
@@ -279,6 +317,9 @@ private:
     const char *d_origin;
     const char *d_uuid;
     const char *d_auth;
+
+    /// The HTTP status code class of the last PubNub transaction
+    http_status_code_class d_last_http_status_code_class;
     
     PubNub_BASE_CLIENT publish_client, history_client;
     PubSubClient subscribe_client;
@@ -450,6 +491,7 @@ retry:
         return 0;
     }
     
+    d_last_http_status_code_class = http_scc_unknown;
     client.flush();
     client.print("GET /publish/");
     client.print(d_publish_key);
@@ -491,16 +533,12 @@ retry:
     enum PubNub::PubNub_BH ret = this->_request_bh(client, t_start, timeout, have_param ? '&' : '?');
     switch (ret) {
     case PubNub_BH_OK:
-        /* Success and reached body, return handle to the client
-         * for further perusal. */
         return &client;
     case PubNub_BH_ERROR:
-        /* Failure. */
         client.stop();
         while (client.connected()) ;
         return 0;
     case PubNub_BH_TIMEOUT:
-        /* Time out. Try again. */
         client.stop();
         while (client.connected()) ;
         goto retry;
@@ -524,6 +562,7 @@ retry:
         return 0;
     }
     
+    d_last_http_status_code_class = http_scc_unknown;
     client.flush();
     client.print("GET /subscribe/");
     client.print(d_subscribe_key);
@@ -549,10 +588,8 @@ retry:
         /* Success and reached body. We need to eat '[' first,
          * as our API contract is to return only the "message body"
          * part of reply from subscribe. */
-        if (!client.wait_for_data()
-            || client.read() != '[') {
-            /* Something unexpected. */
-            DBGprintln("Unexpected body in subscribe");
+        if (!client.wait_for_data() || client.read() != '[') {
+            DBGprintln("Unexpected body in subscribe response");
             client.stop();
             while (client.connected()) ;
             return 0;
@@ -565,13 +602,11 @@ retry:
         return &client;
         
     case PubNub_BH_ERROR:
-        /* Failure. */
         client.stop();
         while (client.connected()) ;
         return 0;
         
     case PubNub_BH_TIMEOUT:
-        /* Time out. Try again. */
         client.stop();
         while (client.connected()) ;
         goto retry;
@@ -592,6 +627,7 @@ retry:
         return 0;
     }
     
+    d_last_http_status_code_class = http_scc_unknown;
     client.flush();
     client.print("GET /history/");
     client.print(d_subscribe_key);
@@ -603,16 +639,12 @@ retry:
     enum PubNub::PubNub_BH ret = this->_request_bh(client, t_start, timeout, '?');
     switch (ret) {
     case PubNub_BH_OK:
-        /* Success and reached body, return handle to the client
-         * for further perusal. */
         return &client;
     case PubNub_BH_ERROR:
-        /* Failure. */
         client.stop();
         while (client.connected()) ;
         return 0;
     case PubNub_BH_TIMEOUT:
-        /* Time out. Try again. */
         client.stop();
         while (client.connected()) ;
         goto retry;
@@ -653,15 +685,8 @@ inline enum PubNub::PubNub_BH PubNub::_request_bh(PubNub_BASE_CLIENT &client, un
     /* Now, first digit of HTTP code. */
     WAIT();
     char c = client.read();
-    if (c != '2') {
-        /* HTTP code that is NOT 2xx means trouble.
-         * kthxbai */
-        DBGprint("Wrong HTTP status first digit ASCII code: ");
-        DBGprint((int) c, DEC);
-        DBGprintln(" in bottom half");
-        return PubNub_BH_ERROR;
-    }
-    
+    d_last_http_status_code_class = static_cast<http_status_code_class>(c - '0');
+
     /* Now, we enter in a state machine that shall guide us through
      * the remaining headers to the beginning of the body. */
     enum {

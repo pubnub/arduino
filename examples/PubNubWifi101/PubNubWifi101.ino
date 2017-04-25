@@ -18,12 +18,12 @@
 #include <PubNub.h>
 
 static char ssid[] = "your-wifi-network";   // your network SSID (name)
-static char pass[] = "password";            // your network password
+static char pass[] = "your-wifi-password";  // your network password
 int status = WL_IDLE_STATUS;                // the Wifi radio's status
 
-const static char pubkey[] = "your-pub-key";
-const static char subkey[] = "your-sub-key";
-const static char channel[] = "hello_world";
+const static char pubkey[] = "demo";         // your publish key 
+const static char subkey[] = "demo";         // your subscribe key
+const static char channel[] = "hello_world"; // channel to use
 
 
 void setup() {
@@ -53,7 +53,7 @@ void loop() {
   /* Publish */
   
   WiFiClient *client;
-   
+  
   char msg[] = "\"Yo!\"";
 
   client = PubNub.publish(channel, msg);
@@ -63,7 +63,15 @@ void loop() {
     delay(1000);
     return;
   }
+  if (PubNub.get_last_http_status_code_class() != PubNub::http_scc_success) {
+    Serial.print("Got HTTP status code error from PubNub, class: ");
+    Serial.print(PubNub.get_last_http_status_code_class(), DEC);
+  }
+  while (client->available()) {
+    Serial.write(client->read());
+  }
   client->stop();
+  Serial.println("---");
 }
 
 
