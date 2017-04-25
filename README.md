@@ -1,4 +1,4 @@
-#PubNub Arduino Library
+# PubNub Arduino Library
 
 This library allows your sketches to communicate with the PubNub cloud
 message passing system using an Ethernet shield or any other network
@@ -6,10 +6,10 @@ hardware (chip/shield) that has a class compatible with Arduino de
 facto standard `EthernetClient`. Your application can receive and send
 messages.
 
-##Copy-and-Paste-Ready Code!
+## Copy-and-Paste-Ready Code!
 See how easy it is to [Publish](examples/PubNubPublisher) and [Subscribe](examples/PubNubSubscriber)!
 
-###Synopsis
+### Synopsis
 
 
 	void setup() {
@@ -52,7 +52,7 @@ See how easy it is to [Publish](examples/PubNubPublisher) and [Subscribe](exampl
 		delay(10000);
 	}
 
-##Library Reference
+## Library Reference
 
 ``bool PubNub.begin(char *publish_key, char *subscribe_key, char *origin)``
 
@@ -128,7 +128,7 @@ a note about timeouts below.
 This is not an officially supported API, it is there mostly for
 convinience for people that used it
 
-##Installation
+## Installation
 
 Since version 1.1.1, Pubnub SDK is part of the Arduino Library
 Manager and you can use it directly from Arduino IDE (v 1.6.8
@@ -153,7 +153,7 @@ This is just a warning, the build and upload process is not impacted in
 any way by this.
 
 
-##Supported Hardware
+## Supported Hardware
 
 In general, the most widely available Arduino boards and shields are
 supported and tested. Any Arduino board that has networking hardware
@@ -224,7 +224,7 @@ implementation of them, `#define` a macro constant before you include
     #define PUBNUB_DEFINE_STRSPN_AND_STRNCASECMP
     #include <Pubnub.h>
 
-##Notes
+## Notes
 
 * If you `#include <PubNub.h>`, it will define the global `PubNub`
   object in your code. Thus, you can't `#include <Pubnub.h>` in two or
