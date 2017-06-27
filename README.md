@@ -128,6 +128,14 @@ a note about timeouts below.
 This is not an officially supported API, it is there mostly for
 convinience for people that used it
 
+### Debug logging
+
+To enable debugg logging to the Arduino console, add
+
+	#define PUBNUB_DEBUG
+
+before `#include <PubNub.h>`
+
 ## Installation
 
 Since version 1.1.1, Pubnub SDK is part of the Arduino Library
