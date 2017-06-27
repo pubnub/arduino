@@ -485,8 +485,10 @@ retry:
     t_start = millis();
     /* connect() timeout is about 30s, much lower than our usual
      * timeout is. */
-    if (!client.connect(d_origin, 80)) {
-        DBGprintln("Connection error");
+    int rslt = client.connect(d_origin, 80);
+    if (rslt != 1) {
+        DBGprint("Connection error ");
+        DBGprintln(rslt);
         client.stop();
         return 0;
     }
