@@ -66,10 +66,42 @@ inline int strncasecmp(const char *s1, const char *s2, size_t n) {
  */
 class PubSubClient : public PubNub_BASE_CLIENT {
 public:
-    PubSubClient() 
-    : PubNub_BASE_CLIENT()
-    , json_enabled(false)
-    {
+    PubSubClient() : PubNub_BASE_CLIENT(), json_enabled(false) {
+        strcpy(timetoken, "0");
+    }
+
+    /* Helper constructors for PubNub_BASE_CLIENT that has
+       constructors with parameters. This would be nicer to do
+       w/perfect forwarding, but we want to use older C++ features for
+       better portability (this should work w/C++98).
+     */
+    template <typename P>
+    PubSubClient(P p) : PubNub_BASE_CLIENT(p), json_enabled(false)  {
+        strcpy(timetoken, "0");
+    }
+    template <typename P>
+    PubSubClient(P& p) : PubNub_BASE_CLIENT(p), json_enabled(false)  {
+        strcpy(timetoken, "0");
+    }
+
+    template <typename FIRST, typename SECOND>
+    PubSubClient(FIRST p_first, SECOND p_second) : 
+      PubNub_BASE_CLIENT(p_first, p_second), json_enabled(false)  {
+        strcpy(timetoken, "0");
+    }
+    template <typename FIRST, typename SECOND>
+    PubSubClient(FIRST& p_first, SECOND p_second) : 
+      PubNub_BASE_CLIENT(p_first, p_second), json_enabled(false)  {
+        strcpy(timetoken, "0");
+    }
+    template <typename FIRST, typename SECOND>
+    PubSubClient(FIRST p_first, SECOND& p_second) : 
+      PubNub_BASE_CLIENT(p_first, p_second), json_enabled(false)  {
+        strcpy(timetoken, "0");
+    }
+    template <typename FIRST, typename SECOND>
+    PubSubClient(FIRST& p_first, SECOND& p_second) : 
+      PubNub_BASE_CLIENT(p_first, p_second), json_enabled(false)  {
         strcpy(timetoken, "0");
     }
 
@@ -159,6 +191,64 @@ private:
 
 class PubNub {
 public:
+
+    /* Helper constructors for PubNub_BASE_CLIENT that has
+       constructors with parameters. This would be nicer to do
+       w/perfect forwarding, but we want to use older C++ features for
+       better portability (this should work w/C++98).
+
+       You need to pass parameter for each of the three clients that
+       we use - for publish transaction, for subscribe transaction and
+       for history transaction. Of course, if you want to use the same
+       ones, then you can pass the same parameters.
+     */
+
+    template <typename P>
+    PubNub(P p_for_publish, P p_for_subscribe, P p_for_history)
+    : publish_client(p_for_publish)
+    , history_client(p_for_history)
+    , subscribe_client(p_for_subscribe) {
+    }
+    template <typename P>
+    PubNub(P& p_for_publish, P& p_for_subscribe, P& p_for_history)
+    : publish_client(p_for_publish)
+    , history_client(p_for_history)
+    , subscribe_client(p_for_subscribe) {
+    }
+
+    template <typename FIRST, typename SECOND>
+    PubNub(FIRST first_for_publish, SECOND second_for_publish, 
+	 FIRST first_for_subscribe, SECOND second_for_subscribe, 
+	 FIRST first_for_history, SECOND second_for_history)
+    : publish_client(first_for_publish, second_for_publish)
+    , history_client(first_for_history, second_for_history)
+    , subscribe_client(first_for_subscribe, second_for_subscribe) {
+    }
+    template <typename FIRST, typename SECOND>
+    PubNub(FIRST& first_for_publish, SECOND second_for_publish, 
+	 FIRST& first_for_subscribe, SECOND second_for_subscribe, 
+	 FIRST& first_for_history, SECOND second_for_history)
+    : publish_client(first_for_publish, second_for_publish)
+    , history_client(first_for_history, second_for_history)
+    , subscribe_client(first_for_subscribe, second_for_subscribe) {
+    }
+    template <typename FIRST, typename SECOND>
+    PubNub(FIRST first_for_publish, SECOND& second_for_publish, 
+	 FIRST first_for_subscribe, SECOND& second_for_subscribe, 
+	 FIRST first_for_history, SECOND& second_for_history)
+    : publish_client(first_for_publish, second_for_publish)
+    , history_client(first_for_history, second_for_history)
+    , subscribe_client(first_for_subscribe, second_for_subscribe) {
+    }
+    template <typename FIRST, typename SECOND>
+    PubNub(FIRST& first_for_publish, SECOND& second_for_publish, 
+	 FIRST& first_for_subscribe, SECOND& second_for_subscribe, 
+	 FIRST& first_for_history, SECOND& second_for_history)
+    : publish_client(first_for_publish, second_for_publish)
+    , history_client(first_for_history, second_for_history)
+    , subscribe_client(first_for_subscribe, second_for_subscribe) {
+    }
+
     /**
      * Init the Pubnub Client API
      *
@@ -302,6 +392,7 @@ public:
     inline http_status_code_class get_last_http_status_code_class() const {
         return d_last_http_status_code_class;
     }
+
 
 private:
     enum PubNub_BH {
