@@ -880,10 +880,14 @@ public:
     }
 
 private:
-    State  d_state;
+    /** Parser/cracker state */
+    State d_state;
+    /** Current bracket level - starts at 0 */
     size_t d_bracket_level;
-    bool   d_in_quotes;
-    bool   d_backslash;
+    /** Are we inside quotes (string) */
+    bool d_in_quotes;
+    /** Was the last character a backslash? Valid only inside quotes */
+    bool d_backslash;
 };
 
 /** This assumes that the received message is valid JSON.  If it is
@@ -975,8 +979,11 @@ public:
     State state() const { return d_state; }
 
 private:
-    PubSubClient*  d_psc;
-    State          d_state;
+    /** Client to read incoming response from */
+    PubSubClient* d_psc;
+    /** Current cracker/parser state */
+    State d_state;
+    /** The message array cracker */
     MessageCracker d_crack;
 };
 
@@ -1021,8 +1028,10 @@ public:
 
 
 private:
+    /** Client to read incoming response from */
     PubNonSubClient* d_pnsc;
-    MessageCracker   d_crack;
+    /** The message array cracker */
+    MessageCracker d_crack;
 };
 
 /** Used for (minimal) parsing of the response to publish.
@@ -1222,12 +1231,22 @@ public:
     enum { MAX_DESCRIPTION = 50, MAX_TIMESTAMP = 20 };
 
 private:
-    State   d_state;
+    /** Current parser/cracker state */
+    State d_state;
+    /** Outcome of the publish as reported by PubNub */
     Outcome d_outcome;
-    char    d_description[MAX_DESCRIPTION + 1];
-    size_t  d_desc_i;
-    char    d_timestamp[MAX_TIMESTAMP + 1];
-    size_t  d_ts_i;
+    /** Statically allocated string of the description of
+        the publish outcome as reported by PubNub */
+    char d_description[MAX_DESCRIPTION + 1];
+    /** Current position inside `d_description`, will
+        write next char there */
+    size_t d_desc_i;
+    /** Statically allocated string of the timestamp/token of
+        the publish  as reported by PubNub */
+    char d_timestamp[MAX_TIMESTAMP + 1];
+    /** Current position inside `d_timestamp`, will
+        write next char there */
+    size_t d_ts_i;
 };
 
 
