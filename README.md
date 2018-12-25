@@ -6,7 +6,8 @@ has a class compatible with Arduino de facto standard `Client`. Your
 application can receive (subscrbie to) and send (publish) messages.
 
 ## Copy-and-Paste-Ready Code!
-See how easy it is to [Publish](examples/PubNubPublisher) and [Subscribe](examples/PubNubSubscriber)!
+See how easy it is to [Publish](examples/PubNubPublisher) 
+and [Subscribe](examples/PubNubSubscriber)!
 
 ### Synopsis
 
@@ -29,35 +30,31 @@ See how easy it is to [Publish](examples/PubNubPublisher) and [Subscribe](exampl
            something else here, or maybe nothing at all. */
         Ethernet.maintain();
 
-        /* Publish message. You could use `auto` instead of naming
-            the class.
-        */
+        /* Publish message. You could use `auto` here... */
         PubNonSubClient *pclient = PubNub.publish(pubchannel, "\"message\"");
         if (!pclient) return;
-        PublishCracker crack;
-        crack.read_and_parse(pclient);
-        /** You're mostly interested in `outcome()`, and
-            if it's "failed", then `description()`. The
-            rest is there for completeness and debugging.
+        PublishCracker cheez;
+        cheez.read_and_parse(pclient);
+        /** You're mostly interested in `outcome()`, and,
+            if it's "failed", then `description()`. 
         */
-        Serial.print("Outcome: "); Serial.print(crack.outcome());
-        Serial.print(' '); Serial.println(crack.to_str(crack.outcome()));
-        Serial.print("description: "); Serial.println(crack.description());
-        Serial.print("timestamp: "); Serial.println(crack.timestamp());
-        Serial.print("state: "); Serial.print(crack.state());
-        Serial.print(' '); Serial.println(crack.to_str(crack.state()));
+        Serial.print("Outcome: "); Serial.print(cheez.outcome());
+        Serial.print(' '); Serial.println(crack.to_str(cheez.outcome()));
+        Serial.print("description: "); Serial.println(cheez.description());
+        Serial.print("timestamp: "); Serial.println(cheez.timestamp());
+        Serial.print("state: "); Serial.print(cheez.state());
+        Serial.print(' '); Serial.println(crack.to_str(cheez.state()));
         pclient->stop();
 
         /* Wait for news. */
         PubSubClient *sclient = PubNub.subscribe(subchannel);
         if (!sclient) return; // error
         String msg;
-        SubscribeMessageCracker crack(sclient);
-            while (!crack.finished()) {
-            crack.get(msg);
+        SubscribeMessageCracker ritz(sclient);
+        while (!ritz.finished()) {
+            ritz.get(msg);
             if (msg.length() > 0) {
-                Serial.print("Received: ");
-                Serial.println(msg);
+                Serial.print("Received: "); Serial.println(msg);
             }
         }
         sclient->stop();
@@ -78,7 +75,7 @@ things work.
 BTW, if you used `auto` instead of naming the class, there will be no
 need to update.
 
-Same goes for `history()`, it now returns PubNub's own Client. 
+Same goes for `history()`, it now returns PubNub's own Client.
 
 But, `subscribe()` does not need any update, it still returns
 `PubSubClient*`.
@@ -111,7 +108,7 @@ Send a message (assumed to be well-formed JSON) to a given channel.
 Returns `NULL` in case of error, instead a pointer to an instance of
 `Client`-compatible class that you can use to read the reply to the
 publish command. If you don't care about it, call ``client->stop()``
-right away. 
+right away.
 
 Since v2.1.0, if Pubnub responds with a HTTP status code indicating a
 failure, this will not return `NULL`. Of course, `NULL` will still be
@@ -198,7 +195,7 @@ use the "getters" to see the parts of the message:
   this is seldom interesting.
 * `state()` to see if parsing is complete (`done`). For logging,
   use `to_str()` to get a string "representation" of the state.
-  
+
 If you want more control, you can read the reponse yourself and
 use `handle()` to pass them to the parser/cracker, (instead
 of using `read_and_parse()`).
