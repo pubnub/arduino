@@ -2,7 +2,7 @@
 
 This library allows your sketches to communicate with the PubNub cloud
 message passing system using any network hardware (chip/shield) that
-has a class compatible with Arduino de facto standard `Client`. Your
+has a class compatible with Arduino de facto standard `Client`. Your 
 application can receive (subscribe to) and send (publish) messages.
 
 ## Copy-and-Paste-Ready Code!
@@ -345,9 +345,7 @@ implementation of them, `#define` a macro constant before you include
 * We don't provide any SSL/TLS support, because of modest resource of
   most Arduino compatible boards. But, some shields/boards have SSL
   ("Secure") clients and you may succeed in using them instead of the
-  non-secure clients (say `WiFiClientSecure` instead of
-  `WiFiClient`). How to do that depends on the specific hardware and
-  library.
+  non-secure clients (`WiFiClientSecure` instead of `WiFiClient`).
 
 * We re-resolve the origin server IP address before each request.
   This means some slow-down for intensive communication, but we rather
@@ -358,10 +356,6 @@ implementation of them, `#define` a macro constant before you include
   returning an already preloaded string so that (a) they can do that
   in loop() code while taking care of other things as well (b) we don't
   waste precious RAM by pre-allocating buffers that are never needed.
-
-* If you are having problems connecting, maybe you have hit
-  a bug in Debian's version of Arduino pertaining the DNS code. Try using
-  an IP address as origin and/or upgrading your Arduino package.
 
 * The optional timeout parameter allows you to specify a timeout
   period after which the subscribe call shall be retried. Note
