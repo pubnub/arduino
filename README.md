@@ -3,7 +3,7 @@
 This library allows your sketches to communicate with the PubNub cloud
 message passing system using any network hardware (chip/shield) that
 has a class compatible with Arduino de facto standard `Client`. Your
-application can receive (subscrbie to) and send (publish) messages.
+application can receive (subscribe to) and send (publish) messages.
 
 ## Copy-and-Paste-Ready Code!
 See how easy it is to [Publish](examples/PubNubPublisher) 
@@ -39,11 +39,11 @@ and [Subscribe](examples/PubNubSubscriber)!
             if it's "failed", then `description()`. 
         */
         Serial.print("Outcome: "); Serial.print(cheez.outcome());
-        Serial.print(' '); Serial.println(crack.to_str(cheez.outcome()));
+        Serial.print(' '); Serial.println(cheez.to_str(cheez.outcome()));
         Serial.print("description: "); Serial.println(cheez.description());
         Serial.print("timestamp: "); Serial.println(cheez.timestamp());
         Serial.print("state: "); Serial.print(cheez.state());
-        Serial.print(' '); Serial.println(crack.to_str(cheez.state()));
+        Serial.print(' '); Serial.println(cheez.to_str(cheez.state()));
         pclient->stop();
 
         /* Wait for news. */
@@ -66,11 +66,11 @@ and [Subscribe](examples/PubNubSubscriber)!
 
 The `publish()` method now returns PubNub's "own" `Client` compatible
 class (that is, pointer to an object of said class). It used to return
-a pointer to the network client used. In most cases, your sketch will
-continue to work, only in some special cases (like ESP32), where the
-implementation of the client class is not actually conforming to the
-"contract" of the `Cient` interface, will you need to update to make
-things work.
+a pointer to the network client class used. In most cases, your sketch
+will continue to work, only in some special cases (like ESP32), where
+the implementation of the client class is not actually conforming to
+the "contract" of the `Cient` interface, will you need to update to
+make things work.
 
 BTW, if you used `auto` instead of naming the class, there will be no
 need to update.
@@ -105,15 +105,16 @@ The origin parameter is optional, defaulting to "pubsub.pubnub.com".
 
 Send a message (assumed to be well-formed JSON) to a given channel.
 
-Returns `NULL` in case of error, instead a pointer to an instance of
-`Client`-compatible class that you can use to read the reply to the
-publish command. If you don't care about it, call ``client->stop()``
-right away.
+Returns `NULL` in case of error, otherwise a pointer to an instance of
+`Client`-compatible class that you can use to read the response to the
+publish command. If you don't care about the response, call
+``client->stop()`` right away.
 
 Since v2.1.0, if Pubnub responds with a HTTP status code indicating a
 failure, this will not return `NULL`. Of course, `NULL` will still be
-returned for other errors, like, DNS failure, network failure, etc.
-If you care, you should check the HTTP status code class, like:
+returned for other errors, mostly networking errors like DNS failure,
+connection failure, etc.  If you care, you should check the HTTP
+status code class, like:
 
     if (PubNub.get_last_http_status_code_class() != PubNub::http_scc_success) {
         Serial.print("Got HTTP status code error from PubNub, class: ");
@@ -126,13 +127,14 @@ note about timeouts below.
 To avoid parsing the response, you should use `PublishCracker` "on"
 the result of this member function.
 
-``PubSubClient *subscribe(char *channel)``
+``PubSubClient *subscribe(char *channel, int timeout)``
 
 Listen for a message on a given channel. The function will block and
-return when a message arrives. NULL is returned in case of error.  The
-return type is `PubSubClient`, which is `Client` compatible, but it
-also provides an extra convenience method ``wait_for_data()`` that
-allows you to wait for more data with sensible timeout.
+return when message(s) arrive(s) (or timeout expires). NULL is
+returned in case of error.  The return type is `PubSubClient`, which
+is `Client` compatible, but it also provides an extra convenience
+method ``wait_for_data()`` that allows you to wait for more data with
+sensible timeout.
 
 Typically, you will run this function from `loop()` function to keep
 listening for messages indefinitely.
@@ -144,10 +146,11 @@ e.g.:
     ["msg1",{msg2:"x"}]
 ```
 
-and so on. Empty reply [] is also normal and your code must be
-able to handle that. Note that the reply specifically does not
-include the time token present in the raw reply from PubNub;
-no need to worry about that.
+and so on. Empty reply (`[]`) is also normal and your code must be
+able to handle that - it means no messages were pulished during a
+time(out) set on the PubNub side. Note that the reply specifically
+does not include the time token present in the raw reply from PubNub;
+it is filtered out by `PubSubClient`.
 
 The timeout parameter is optional, with a sensible default. See also a
 note about timeouts below.
@@ -158,28 +161,28 @@ the result of this member function.
 
 ``PubNonSubClient *history(char *channel, int limit, int timeout)``
 
-Receive list of the last messages published on the given channel.
-The limit argument is optional and defaults to 10. Keep in mind that
+Receive list of the last messages published on the given channel.  The
+limit argument is optional and defaults to 10. Keep in mind that
 PubNub network has its own limit, which was 100 at the time of this
-writing - thus, even if you set `limit` to something higher than
-that (say `1000`) you will not actually get that many messages.
+writing. Thus, even if you set `limit` to something higher than that
+(say `1000`) you will not actually get that many messages.
 
 The timeout parameter is optional, with sensible default. See also
 a note about timeouts below.
 
 ### Message crackers
 
-These are used to interpret the response from Pubnub, so that you
-don't have to. Their interface is much easier to use than the "low
-level" (essentially `Client`) interface. This interpretation is
-minimal and non-validating, mostly to "tell elements of the response
-apart", thus they are named "message crackers" (and not "parsers" or
+These are used to interpret/parse the response from Pubnub, so that
+you don't have to. Their interface is much easier to use than the "low
+level" (essentially `Client`) interface. This parsing is minimal and
+non-validating, mostly to "tell elements of the response apart", thus
+they are named "message crackers" (and not "parsers" or
 "interpreters"), which might make for an interesting piece of
 nostalgia to users familiar w/WinAPI.
 
-Each API has its own class, because the format of the response is
-different. But, for some groups of classes (APIs), the user interface
-is essentially the same.
+Each API (publish, subscribe...) has its own class, because the format
+of the PubNub response is different. But, for some groups of classes
+(APIs), the user interface is essentially the same.
 
 ``PublishCracker``
 
@@ -196,20 +199,20 @@ use the "getters" to see the parts of the message:
 * `state()` to see if parsing is complete (`done`). For logging,
   use `to_str()` to get a string "representation" of the state.
 
-If you want more control, you can read the reponse yourself and
-use `handle()` to pass them to the parser/cracker, (instead
-of using `read_and_parse()`).
+If you want more control, you can read the response characters
+yourself and use `handle()` to pass them to the parser/cracker,
+(instead of using `read_and_parse()`).
 
 ``SubscribeCracker``
 
 Declare an object passing the `PubSubClient` you got from
 `subscribe()`.  Then, until parsing is `finished()`, call `get()` to
-get the next message in the PubNub response. Keep in mind that one
+obtain the next message in the PubNub response. Keep in mind that one
 subscribe can yield more than one message in the response, as more
 than one message might have been published on the channel(s) you are
-subscribing to between to calls to `subscribe()`.
+subscribing to between two calls to `subscribe()`.
 
-If you want more control, you can read the characters of the reponse
+If you want more control, you can read the characters of the response
 yourself and use `handle()` to pass them to the parser/cracker,
 (instead of using `get()`).
 
