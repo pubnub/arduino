@@ -83,8 +83,8 @@ void loop()
         return;
     }
 
-    String                  msg;
-    SubscribeMessageCracker ritz(client);
+    String           msg;
+    SubscribeCracker ritz(client);
     while (!ritz.finished()) {
         ritz.get(msg);
         if (msg.length() > 0) {
