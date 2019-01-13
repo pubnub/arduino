@@ -102,7 +102,7 @@ void loop()
         return;
     }
     String                  msg;
-    SubscribeMessageCracker ritz(sclient);
+    SubscribeCracker ritz(sclient);
     while (!ritz.finished()) {
         ritz.get(msg);
         if (msg.length() > 0) {
@@ -120,7 +120,7 @@ void loop()
         delay(1000);
         return;
     }
-    SubscribeMessageCracker tuc(hisclient);
+    SubscribeCracker tuc(hisclient);
     while (!tuc.finished()) {
         tuc.get(msg);
         if (msg.length() > 0) {

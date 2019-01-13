@@ -50,7 +50,7 @@ and [Subscribe](examples/PubNubSubscriber)!
         PubSubClient *sclient = PubNub.subscribe(subchannel);
         if (!sclient) return; // error
         String msg;
-        SubscribeMessageCracker ritz(sclient);
+        SubscribeCracker ritz(sclient);
         while (!ritz.finished()) {
             ritz.get(msg);
             if (msg.length() > 0) {
