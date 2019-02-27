@@ -323,14 +323,14 @@ that, it expects a working network.  We provide examples for some HW.
 
 ### ESP8266
 
-In previous section we already showed what to do to use ESP8266, but
-in most versions of ESP8266 support for Arduino, some of the (de-facto)
-standard library functions that we use are missing. To use our own
-implementation of them, `#define` a macro constant before you include
-`Pubnub.h`, like this:
+In previous section we already showed how to use ESP8266, but in some
+(older) versions of ESP8266 support for Arduino, some of the
+(de-facto) standard library functions that we use are missing. To use
+our own implementation of them, `#define` a macro constant before you
+include `PubNub.h`, like this:
 
     #define PUBNUB_DEFINE_STRSPN_AND_STRNCASECMP
-    #include <Pubnub.h>
+    #include <PubNub.h>
 
 ## Notes
 
@@ -346,6 +346,7 @@ implementation of them, `#define` a macro constant before you include
   most Arduino compatible boards. But, some shields/boards have SSL
   ("Secure") clients and you may succeed in using them instead of the
   non-secure clients (`WiFiClientSecure` instead of `WiFiClient`).
+  But don't forget to `PubNub.set_port(PubNub.tls_port)`.
 
 * We re-resolve the origin server IP address before each request.
   This means some slow-down for intensive communication, but we rather
@@ -358,7 +359,7 @@ implementation of them, `#define` a macro constant before you include
   waste precious RAM by pre-allocating buffers that are never needed.
 
 * The optional timeout parameter allows you to specify a timeout
-  period after which the subscribe call shall be retried. Note
+  period after which the subscribe call shall be cancelled. Note
   that this timeout is applied only for reading response, not for
   connecting or sending data; use retransmission parameters of
   the network library to tune this. As a rule of thumb, timeout

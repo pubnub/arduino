@@ -254,6 +254,7 @@ public:
         d_uuid                        = 0;
         d_auth                        = 0;
         d_last_http_status_code_class = http_scc_unknown;
+        set_port(http_port);
     }
 
     /**
@@ -282,6 +283,16 @@ public:
     };
 
     /**
+     * Possible TCP/IP ports to use when connecting to Pubnub.
+     */
+    enum port_for_connection {
+        /** Connect via HTTP on its default port */
+        http_port,
+        /** Connect via TLS (formerly known as SSL) on its default port) */
+        tls_port
+    };
+
+    /**
      * Set the UUID identification of PubNub client. This is useful
      * e.g. for presence identification.
      *
@@ -298,6 +309,23 @@ public:
      * Pass 0 to unset. The string is not copied over (just like
      * in begin()). */
     void set_auth(const char* auth) { d_auth = auth; }
+
+    /**
+     * Set the TCP/IP port to use when connecting to Pubnub.
+     * Basically, only call this if your client supports SSL/TLS
+     * as you will need to set the `tls_port`.
+     */
+    void set_port(port_for_connection port) {
+        switch (port) {
+        case http_port:
+        default:
+            d_port = 80;
+            break;
+        case tls_port:
+            d_port = 443;
+            break;
+        }
+    }
 
     /**
      * Publish/Send a message (assumed to be well-formed JSON) to a
@@ -396,6 +424,9 @@ private:
     const char* d_origin;
     const char* d_uuid;
     const char* d_auth;
+
+    /// TCP/IP port to use.
+    unsigned d_port;
 
     /// The HTTP status code class of the last PubNub transaction
     http_status_code_class d_last_http_status_code_class;
@@ -575,14 +606,12 @@ inline PubNonSubClient* PubNub::publish(const char* channel,
                                         int         timeout)
 {
     PubNonSubClient& client = publish_client;
-    unsigned long    t_start;
     int              have_param = 0;
+    unsigned long    t_start = millis();
 
-retry:
-    t_start = millis();
     /* connect() timeout is about 30s, much lower than our usual
      * timeout is. */
-    int rslt = client.connect(d_origin, 80);
+    int rslt = client.connect(d_origin, d_port);
     if (rslt != 1) {
         DBGprint("Connection error ");
         DBGprintln(rslt);
@@ -638,15 +667,17 @@ retry:
     case PubNub_BH_OK:
         return &client;
     case PubNub_BH_ERROR:
+        DBGprintln("publish() BH_ERROR");
         client.stop();
         while (client.connected())
             ;
         return 0;
     case PubNub_BH_TIMEOUT:
+        DBGprintln("publish() BH_TIMEOUT");
         client.stop();
         while (client.connected())
             ;
-        goto retry;
+        return 0;
     }
 }
 
@@ -654,14 +685,12 @@ retry:
 inline PubSubClient* PubNub::subscribe(const char* channel, int timeout)
 {
     PubSubClient& client = subscribe_client;
-    unsigned long t_start;
     int           have_param = 0;
+    unsigned long t_start = millis();
 
-retry:
-    t_start = millis();
     /* connect() timeout is about 30s, much lower than our usual
      * timeout is. */
-    if (!client.connect(d_origin, 80)) {
+    if (!client.connect(d_origin, d_port)) {
         DBGprintln("Connection error");
         client.stop();
         return 0;
@@ -716,16 +745,20 @@ retry:
         return &client;
 
     case PubNub_BH_ERROR:
+        DBGprintln("subscribe() BH_ERROR");
         client.stop();
         while (client.connected())
             ;
         return 0;
 
     case PubNub_BH_TIMEOUT:
+        DBGprintln("subscribe() BH_TIMEOUT");
         client.stop();
+        DBGprintln("subscribe() BH_TIMEOUT stopped");
         while (client.connected())
             ;
-        goto retry;
+        DBGprintln("subscribe() BH_TIMEOUT disconnected");
+        return 0;
     }
 }
 
@@ -733,11 +766,9 @@ retry:
 inline PubNonSubClient* PubNub::history(const char* channel, int limit, int timeout)
 {
     PubNonSubClient& client = history_client;
-    unsigned long    t_start;
+    unsigned long    t_start = millis();
 
-retry:
-    t_start = millis();
-    if (!client.connect(d_origin, 80)) {
+    if (!client.connect(d_origin, d_port)) {
         DBGprintln("Connection error");
         client.stop();
         return 0;
@@ -757,15 +788,17 @@ retry:
     case PubNub_BH_OK:
         return &client;
     case PubNub_BH_ERROR:
+        DBGprintln("history() BH_ERROR");
         client.stop();
         while (client.connected())
             ;
         return 0;
     case PubNub_BH_TIMEOUT:
+        DBGprintln("history() BH_TIMEOUT");
         client.stop();
         while (client.connected())
             ;
-        goto retry;
+        return 0;
     }
 }
 
