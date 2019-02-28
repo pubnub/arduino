@@ -670,13 +670,13 @@ inline PubNonSubClient* PubNub::publish(const char* channel,
         DBGprintln("publish() BH_ERROR");
         client.stop();
         while (client.connected())
-            ;
+            delay(10);
         return 0;
     case PubNub_BH_TIMEOUT:
         DBGprintln("publish() BH_TIMEOUT");
         client.stop();
         while (client.connected())
-            ;
+            delay(10);
         return 0;
     }
 }
@@ -727,14 +727,14 @@ inline PubSubClient* PubNub::subscribe(const char* channel, int timeout)
             DBGprintln("No data received!");
             client.stop();
             while (client.connected())
-                ;
+                delay(10);
             return 0;
         }
         if (client.read() != '[') {
             DBGprintln("Unexpected body in subscribe response");
             client.stop();
             while (client.connected())
-                ;
+                delay(10);
             return 0;
         }
         /* Now return handle to the client for further perusal.
@@ -748,7 +748,7 @@ inline PubSubClient* PubNub::subscribe(const char* channel, int timeout)
         DBGprintln("subscribe() BH_ERROR");
         client.stop();
         while (client.connected())
-            ;
+            delay(10);
         return 0;
 
     case PubNub_BH_TIMEOUT:
@@ -756,7 +756,7 @@ inline PubSubClient* PubNub::subscribe(const char* channel, int timeout)
         client.stop();
         DBGprintln("subscribe() BH_TIMEOUT stopped");
         while (client.connected())
-            ;
+            delay(10);
         DBGprintln("subscribe() BH_TIMEOUT disconnected");
         return 0;
     }
@@ -791,13 +791,13 @@ inline PubNonSubClient* PubNub::history(const char* channel, int limit, int time
         DBGprintln("history() BH_ERROR");
         client.stop();
         while (client.connected())
-            ;
+            delay(10);
         return 0;
     case PubNub_BH_TIMEOUT:
         DBGprintln("history() BH_TIMEOUT");
         client.stop();
         while (client.connected())
-            ;
+            delay(10);
         return 0;
     }
 }
