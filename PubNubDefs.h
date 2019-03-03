@@ -179,9 +179,8 @@ public:
         }
         /* We are still connected. Read the rest of the stream so that
          * we catch the timetoken. */
-        while (wait_for_data()) {
-            char ch = read();
-            this->_state_input(ch, 0, 0);
+        while (wait_for_data(10)) {
+            read();
         }
         json_enabled = false;
     }
@@ -600,6 +599,17 @@ inline void PubSubClient::_grab_timetoken(uint8_t* nextbuf, size_t nextsize)
     timetoken[new_timetoken_len] = 0;
 }
 
+inline bool await_disconnect(PubNub_BASE_CLIENT& client, unsigned long timeout) {
+    unsigned long    t_start = millis();
+    while (client.connected()) {
+        if (millis() - t_start > timeout * 1000UL) {
+            return false;
+        }
+        delay(10);
+    }
+    return true;
+}
+
 
 inline PubNonSubClient* PubNub::publish(const char* channel,
                                         const char* message,
@@ -669,14 +679,16 @@ inline PubNonSubClient* PubNub::publish(const char* channel,
     case PubNub_BH_ERROR:
         DBGprintln("publish() BH_ERROR");
         client.stop();
-        while (client.connected())
-            delay(10);
+        if (!await_disconnect(client, 10)) {
+            DBGprintln("publish() BH_ERROR: disconnect timeout");
+        }
         return 0;
     case PubNub_BH_TIMEOUT:
         DBGprintln("publish() BH_TIMEOUT");
         client.stop();
-        while (client.connected())
-            delay(10);
+        if (!await_disconnect(client, 10)) {
+            DBGprintln("publish() BH_TIMEOUT: disconnect timeout");
+        }
         return 0;
     }
 }
@@ -726,15 +738,17 @@ inline PubSubClient* PubNub::subscribe(const char* channel, int timeout)
         if (!client.wait_for_data()) {
             DBGprintln("No data received!");
             client.stop();
-            while (client.connected())
-                delay(10);
+            if (!await_disconnect(client, 10)) {
+                DBGprintln("subscribe() no data received: disconnect timeout");
+            }
             return 0;
         }
         if (client.read() != '[') {
             DBGprintln("Unexpected body in subscribe response");
             client.stop();
-            while (client.connected())
-                delay(10);
+            if (!await_disconnect(client, 10)) {
+                DBGprintln("subscribe() unexpected body: disconnect timeout");
+            }
             return 0;
         }
         /* Now return handle to the client for further perusal.
@@ -747,17 +761,21 @@ inline PubSubClient* PubNub::subscribe(const char* channel, int timeout)
     case PubNub_BH_ERROR:
         DBGprintln("subscribe() BH_ERROR");
         client.stop();
-        while (client.connected())
-            delay(10);
+        if (!await_disconnect(client, 10)) {
+            DBGprintln("subscribe() BH_ERROR: disconnect timeout");
+        }
         return 0;
 
     case PubNub_BH_TIMEOUT:
         DBGprintln("subscribe() BH_TIMEOUT");
         client.stop();
         DBGprintln("subscribe() BH_TIMEOUT stopped");
-        while (client.connected())
-            delay(10);
-        DBGprintln("subscribe() BH_TIMEOUT disconnected");
+        if (await_disconnect(client, 10)) {
+            DBGprintln("subscribe() BH_TIMEOUT: disconnected");
+        }
+        else {
+            DBGprintln("subscribe() BH_TIMEOUT: disconnect timeout");
+        }
         return 0;
     }
 }
@@ -790,14 +808,16 @@ inline PubNonSubClient* PubNub::history(const char* channel, int limit, int time
     case PubNub_BH_ERROR:
         DBGprintln("history() BH_ERROR");
         client.stop();
-        while (client.connected())
-            delay(10);
+        if (!await_disconnect(client, 10)) {
+            DBGprintln("history() BH_ERROR: disconnect timeout");
+        }
         return 0;
     case PubNub_BH_TIMEOUT:
         DBGprintln("history() BH_TIMEOUT");
         client.stop();
-        while (client.connected())
-            delay(10);
+        if (!await_disconnect(client, 10)) {
+            DBGprintln("history() BH_TIMEOUT: disconnect timeout");
+        }
         return 0;
     }
 }
