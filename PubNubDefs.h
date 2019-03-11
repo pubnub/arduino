@@ -855,7 +855,7 @@ public:
             switch (c) {
             case '{':
             case '[':
-                d_bracket_level = 0;
+                d_bracket_level = 1;
                 d_state         = in_message;
                 msg.concat(c);
                 break;
@@ -873,7 +873,8 @@ public:
                 d_state = done;
                 break;
             default:
-                d_state = in_message;
+                d_bracket_level = 0;
+                d_state         = in_message;
                 msg.concat(c);
                 break;
             }
@@ -912,10 +913,13 @@ public:
                 break;
             case '}':
             case ']':
-                if (--d_bracket_level == 0) {
-                    d_state = ground_zero;
+                if (0 == d_bracket_level) {
+                    d_state = done;
                 }
-                msg.concat(c);
+                else if (--d_bracket_level == 0) {
+                    d_state = ground_zero;
+                    msg.concat(c);
+                }
                 break;
             default:
                 msg.concat(c);
@@ -1009,7 +1013,7 @@ public:
     int get(String& msg)
     {
         msg.remove(0);
-        while (!finished() && !d_crack.msg_complete(msg)) {
+        while (!finished() && !message_complete(msg)) {
             if (!d_psc->wait_for_data()) {
                 break;
             }
