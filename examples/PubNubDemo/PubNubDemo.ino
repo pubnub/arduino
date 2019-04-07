@@ -80,7 +80,7 @@ void loop()
     Serial.print("Outcome: ");
     Serial.print(cheez.outcome());
     Serial.print(' ');
-    Serial.println(crack.to_str(cheez.outcome()));
+    Serial.println(cheez.to_str(cheez.outcome()));
     Serial.print("description: ");
     Serial.println(cheez.description());
     Serial.print("timestamp: ");
@@ -88,7 +88,7 @@ void loop()
     Serial.print("state: ");
     Serial.print(cheez.state());
     Serial.print(' ');
-    Serial.println(crack.to_str(cheez.state()));
+    Serial.println(cheez.to_str(cheez.state()));
 
     client->stop();
     Serial.println();
@@ -102,7 +102,7 @@ void loop()
         return;
     }
     String                  msg;
-    SubscribeCracker ritz(sclient);
+    SubscribeCracker ritz(subclient);
     while (!ritz.finished()) {
         ritz.get(msg);
         if (msg.length() > 0) {
@@ -120,7 +120,7 @@ void loop()
         delay(1000);
         return;
     }
-    SubscribeCracker tuc(hisclient);
+    HistoryCracker tuc(hisclient);
     while (!tuc.finished()) {
         tuc.get(msg);
         if (msg.length() > 0) {
