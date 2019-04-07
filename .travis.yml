@@ -1,0 +1,25 @@
+sudo: false
+language: ruby
+
+os:
+  - linux
+  - osx
+
+env:
+  - BADGE=linux
+  - BADGE=osx
+
+# hack to get some OS-specific badges
+matrix:
+  exclude:
+    - os: linux
+      env: BADGE=osx
+    - os: osx
+      env: BADGE=linux
+
+#before_install: gem install bundler -v 1.15.4
+script:
+   - g++ -v
+   - bundle install
+   - bundle exec arduino_ci_remote.rb
+

@@ -20,6 +20,7 @@
 #define DBGprintln(x...)
 #endif
 
+
 /* Under some board support libraries, like ESP8266,
    the (de-facto) standard library functions are missing.
    To use Pubnub library with those boards, you need to
@@ -34,7 +35,7 @@ inline size_t strspn(const char* cs, const char* ct)
         for (p = ct; *p && *p != *cs; ++p) {
             continue;
         }
-        if (*p != '\0') {
+        if (*p == '\0') {
             break;
         }
     }
@@ -118,8 +119,8 @@ class PubSubClient : public PubNub_BASE_CLIENT {
 public:
     PubSubClient()
         : PubNub_BASE_CLIENT()
-        , json_enabled(false)
         , d_avail(0)
+        , json_enabled(false)
     {
         strcpy(timetoken, "0");
     }
@@ -154,6 +155,7 @@ public:
     int read(uint8_t* buf, size_t size)
     {
         int len = PubNub_BASE_CLIENT::read(buf, size);
+
         if (d_avail > len) {
             if (len > 0) {
                 d_avail -= len;
@@ -254,6 +256,7 @@ public:
         d_auth                        = 0;
         d_last_http_status_code_class = http_scc_unknown;
         set_port(http_port);
+        return true;
     }
 
     /**
@@ -406,6 +409,12 @@ public:
         return d_last_http_status_code_class;
     }
 
+#if defined(PUBNUB_UNIT_TEST)
+    inline PubNonSubClient& publishClient() { return publish_client; }
+    inline PubNonSubClient& historyClient() { return history_client; };
+    inline PubSubClient& subscribeClient() { return subscribe_client; }
+#endif /* PUBNUB_UNIT_TEST */    
+
 private:
     enum PubNub_BH {
         PubNub_BH_OK,
@@ -437,7 +446,7 @@ private:
 
 #if defined(__AVR)
 #include <avr/pgmspace.h>
-#else
+#elif !defined(strncasecmp_P) || defined(PUBNUB_DEFINE_STRSPN_AND_STRNCASECMP)
 #define strncasecmp_P(a, b, c) strncasecmp(a, b, c)
 #endif
 
@@ -691,6 +700,7 @@ inline PubNonSubClient* PubNub::publish(const char* channel,
         }
         return 0;
     }
+    return 0;
 }
 
 
@@ -778,6 +788,7 @@ inline PubSubClient* PubNub::subscribe(const char* channel, int timeout)
         }
         return 0;
     }
+    return 0;
 }
 
 
@@ -820,6 +831,7 @@ inline PubNonSubClient* PubNub::history(const char* channel, int limit, int time
         }
         return 0;
     }
+    return 0;
 }
 
 /** A helper that "cracks" the messages from an array of them.
@@ -916,8 +928,10 @@ public:
                 if (0 == d_bracket_level) {
                     d_state = done;
                 }
-                else if (--d_bracket_level == 0) {
-                    d_state = ground_zero;
+                else {
+                    if (--d_bracket_level == 0) {
+                        d_state = ground_zero;
+                    }
                     msg.concat(c);
                 }
                 break;
@@ -925,6 +939,10 @@ public:
                 msg.concat(c);
                 break;
             }
+            break;
+        case malformed:
+        case done:
+        default:
             break;
         }
     }
@@ -962,7 +980,7 @@ public:
     }
 
     /** Low-level interface, handles one incoming/response character
-        at a time. To see if a message has be "cracked out" of the
+        at a time. To see if a message has been "cracked out" of the
         response, use `message_complete()`.
     */
     void handle(char c, String& msg)
@@ -983,6 +1001,10 @@ public:
                 d_state = malformed;
                 break;
             }
+            break;
+        case malformed:
+        case done:
+        default:
             break;
         }
     }
@@ -1206,6 +1228,9 @@ public:
                 d_state = done;
             }
             break;
+        case done:
+        default:
+            break;
         }
     }
 
@@ -1284,6 +1309,7 @@ public:
         case done:
             return "Done.";
         }
+        return "!?!";
     }
     enum { MAX_DESCRIPTION = 50, MAX_TIMESTAMP = 20 };
 
@@ -1371,9 +1397,9 @@ inline enum PubNub::PubNub_BH PubNub::_request_bh(PubNub_BASE_CLIENT& client,
              * Transfer-Encoding: chunked (or \r\n) */
             const static char chunked_str[] = "Transfer-Encoding: chunked\r\n";
 
-            char line[sizeof(chunked_str)]; /* Not NUL-terminated! */
-            int  linelen = 0;
-            char ch      = 0;
+            char     line[sizeof(chunked_str)]; /* Not NUL-terminated! */
+            unsigned linelen = 0;
+            char     ch      = 0;
             do {
                 WAIT();
                 ch              = client.read();
