@@ -1,5 +1,7 @@
 # PubNub Arduino Library
 
+[![Build Status](https://travis-ci.com/pubnub/arduino.svg?branch=master)](https://travis-ci.com/pubnub/arduino)
+
 This library allows your sketches to communicate with the PubNub cloud
 message passing system using any network hardware (chip/shield) that
 has a class compatible with Arduino de facto standard `Client`. Your 
