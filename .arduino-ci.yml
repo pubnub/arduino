@@ -1,18 +1,3 @@
-platforms:
-  zero:
-    board: arduino:samd:arduino_zero_native
-    package: arduino:samd
-    gcc:
-      features:
-      defines:
-       - __SAMD21G18A__
-       - ARDUINO_SAMD_ZERO
-       - __COMPILING_AVR_LIBC__
-       - SPCR
-       - DORD
-      warnings:
-      flags:
-
 unittest:
   platforms:
 #    - uno
