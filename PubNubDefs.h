@@ -9,8 +9,42 @@
 
 
 #if !defined(PubNub_BASE_CLIENT)
+#if defined(ARDUINO_ARCH_ESP8266)
+#include <ESP8266WiFi.h>
+#define PubNub_BASE_CLIENT WiFiClient
+#elif defined(ARDUINO_ARCH_ESP32)
+#include <WiFi.h>
+#define PubNub_BASE_CLIENT WiFiClient
+#elif defined(ARDUINO_SAMD_ZERO) ||                \
+      defined(ARDUINO_SAMD_MKR1000) ||             \
+      defined(ARDUINO_SAMD_MKRFox1200)
+#include <WiFi101.h>
+#define PubNub_BASE_CLIENT WiFiClient
+#elif defined(ARDUINO_STM32_FEATHER)
+#include <adafruit_feather.h>
+#define PubNub_BASE_CLIENT AdafruitTCP
+#elif defined(ARDUINO_METRO_M4_AIRLIFT_LITE) ||    \
+      defined(ARDUINO_SAMD_MKRWIFI1010) ||         \
+      defined(ARDUINO_AVR_UNO_WIFI_REV2)
+#include <WiFiNINA.h>
+#define PubNub_BASE_CLIENT WiFiSSLClient
+#elif defined(ARDUINO_SAMD_MKRGSM1400)
+#include <MKRGSM.h>
+#define PubNub_BASE_CLIENT GSMClient
+#elif defined(ARDUINO_SAMD_MKRWAN1300)
+#include <MKRWAN.h>
+#define PubNub_BASE_CLIENT LoRaModem
+#elif defined(ARDUINO_AVR_YUN)
+#include <Process.h>
+#define PubNub_BASE_CLIENT Process
+#elif defined(ARDUINO_SAMD_MKRNB1500)
+#include <MKRNB.h>
+#define PubNub_BASE_CLIENT NBModem
+#else
+#include <Ethernet.h>
 #define PubNub_BASE_CLIENT EthernetClient
 #endif
+#endif /* !defined(PubNub_BASE_CLIENT) */
 
 #ifdef PUBNUB_DEBUG
 #define DBGprint(x...) Serial.print(x)

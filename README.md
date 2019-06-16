@@ -255,27 +255,33 @@ issue warnings like:
 
     Invalid version found: x.y.z
 
-Where `x.y.z` would be the version ID ofthe manually installed library.
-This is just a warning, the build and upload process is not impacted in
-any way by this.
+Where `x.y.z` would be the version ID of the manually installed
+library.  This is just a warning, the build and upload process is not
+impacted by this.
 
 
 ## Supported Hardware
 
 In general, the most widely available Arduino boards and shields are
 supported and tested. Any Arduino board that has networking hardware
-that supports an `Client` compatible class should work. In most cases,
+that supports a `Client` compatible class should work. In most cases,
 they are actually derived from `Client`, but there are some subtle
 differences in the base `Client` as implemented in various libraries.
+
+Since version 3.3, several boards are automatically detected and you
+don't need to do anything special to use PubNub library on them. For
+others, you'll have to `#define` the `Pubnub_BASE_CLIENT` to the class
+that you use for networking on your board/shield that has the `Client`
+compatible interface _before_ you `#include <PubNub.h>`.
 
 The Arduino ecosystem features a multitude of platforms that
 have significant differences regarding their hardware capabilities.
 Keeping up with all of them is next to impossible.
 
 If you find some Arduino board/shield that does provide an `Client`
-compatbile class and it doesn't work with Pubnub library, let us
-know. In general, this means that it is not _really_ compatible. Such
-was the case with ESP32 library.
+compatbile class and it doesn't work with Pubnub library, let us know
+and we'll make it work. In general, this means that it is not _really_
+compatible. Such was the case with ESP32 library.
 
 Also, if you have some Arduino board/shield that doesn't provide an
 `Client` compatible class and you want to use Pubnub with it, please
@@ -311,25 +317,23 @@ So, for any WiFi101 compatible hardware, you would:
     #define PubNub_BASE_CLIENT WiFiClient
     #include <PubNub.h>
 
-For hadware that doesn't use WiFi101 library, but provides a
-`WiFiClient` class, like ESP8266, you would:
-
-    #include <ESP8266WiFi.h>
-    #define PubNub_BASE_CLIENT WiFiClient
-    #include <PubNub.h>
-
 Of course, please keep in mind that you need to initialize your WiFi
 hardware, connect to a WiFi network and possibly do some maintenance,
 which is hardware specific. But, Pubnub SDK has nothing to do with
 that, it expects a working network.  We provide examples for some HW.
 
-### ESP8266
+### ESP8266 and ESP32
 
-In previous section we already showed how to use ESP8266, but in some
-(older) versions of ESP8266 support for Arduino, some of the
-(de-facto) standard library functions that we use are missing. To use
-our own implementation of them, `#define` a macro constant before you
-include `PubNub.h`, like this:
+ESP8266 and ESP32 are recognized since version 3.3 so can just:
+
+    #include <PubNub.h>
+
+It will include `ESP8266WiFi.h` or `WiFi.h` (for ESP32) automatically.
+
+In some (older) versions of ESP8266 support for Arduino, some of the
+(de-facto) standard library functions were missing. To use our own
+implementation of them, `#define` a macro constant before you include
+`PubNub.h`, like this:
 
     #define PUBNUB_DEFINE_STRSPN_AND_STRNCASECMP
     #include <PubNub.h>
