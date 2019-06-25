@@ -12,7 +12,6 @@
 #include <SPI.h>
 
 #include <WiFi101.h>
-#define PubNub_BASE_CLIENT WiFiClient
 #include <PubNub.h>
 
 static char ssid[] = "your-wifi-network";  // your network SSID (name)
@@ -27,7 +26,7 @@ const static char channel[] = "hello_world"; // channel to use
 void setup()
 {
     // put your setup code here, to run once:
-    Serial.begin(9600);
+    Serial.begin(115200);
     Serial.println("Serial set up");
 
     // attempt to connect using WPA2 encryption:
@@ -51,7 +50,7 @@ void setup()
 
 void loop()
 {
-    char msg[]  = "\"Yo!\"";
+    char msg[]  = "\"arduino-WiFi101-hello-world!\"";
     auto client = PubNub.publish(channel, msg);
     if (!client) {
         Serial.println("publishing error");

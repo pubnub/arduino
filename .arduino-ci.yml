@@ -1,3 +1,31 @@
+platforms:
+
+  mkr1000:
+    board: arduino:samd:mkr1000
+    package: arduino:samd
+    gcc:
+      features:
+      defines:
+        - F_CPU=48000000L
+        - __SAMD21G18A__
+        - ARDUINO_ARCH_SAMD
+        - ARDUINO_SAMD_MKR1000
+      warnings:
+      flags:
+
+compile:
+  libraries: ~
+  platforms:
+    - uno
+    - due
+#    - zero
+    - leonardo
+#    - m4
+    - esp32
+#    - esp8266
+    - mega2560
+    - mkr1000
+
 unittest:
   platforms:
 #    - uno

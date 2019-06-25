@@ -1,22 +1,19 @@
 /*
-  PubNub sample JSON-parsing client with WiFi support
-  This combines two sketches: the PubNubJson example of PubNub library
-  and the WifiWebClientRepeating example of the WiFi library.
-  This sample client will properly parse JSON-encoded PubNub subscription
-  replies using the ArduinoJson library(v6.10). It will send a simple message, then
+  PubNub sample(Esp32, Esp8266 boards) JSON-parsing client with WiFi support.
+  This combines two sketches: the ArduinoJson example of PubNub library
+  and the WifiClient example of the WiFi library.
+  This sample client will properly parse JSON-encoded PubNub subscription replies
+  using the ArduinoJson library(v6.10). It will send a simple message, then
   properly parsing and inspecting a subscription message received back.
 
   Circuit:
-  * Wifi shield attached to pins 10, 11, 12, 13
-  * (Optional) Analog sensors attached to analog pin.
-  * (Optional) LEDs to be dimmed attached to PWM pins 8 and 9.
+  * (Optional) Analog sensors attached to analog pins.
+    (Them pins should be picked and initialized properly for any particular use
+    according to the chosen board specifications and scatch adjusted suitably.)
+  * (Optional) LEDs to be dimmed attached to PWM pins 8 and 9 (Esp8266 board).
 
-  Please refer to the PubNubJson example description for some important
-  notes, especially regarding memory saving on Arduino Uno/Duemilanove.
-  You can also save some RAM by not using WiFi password protection.
-
-  Note that due to use of the ArduinoJSON library, this sketch is more memory
-  sensitive than the others. In order to be able to use it on the boards
+  Note that due to use of the ArduinoJson library, this sketch is more memory
+  sensitive. In order to be able to use it on the boards
   based on ATMega328, some special care is needed. Memory saving tips:
 
   (i) In the file hardware/arduino/cores/arduino/HardwareSerial.cpp
@@ -30,32 +27,46 @@
   */
 
 #include <SPI.h>
+
+#if defined(ARDUINO_ARCH_ESP8266)
+#include <ESP8266WiFi.h>
+#define ANALOG_INPUT_PIN_0 A0
+#define NUM_ANALOG_INPUT_PINS 1
+#elif defined(ARDUINO_ARCH_ESP32)
 #include <WiFi.h>
-#define PubNub_BASE_CLIENT WiFiClient
+#define ANALOG_INPUT_PIN_0 32
+/* Number of analog input pins used, starting with ANALOG_INPUT_PIN_0 */
+#define NUM_ANALOG_INPUT_PINS 3
+#endif
 #include <PubNub.h>
 
 #include <ArduinoJson.h>
 
 using namespace ArduinoJson;
 
-// Some Ethernet shields have a MAC address printed on a sticker on the shield;
-// fill in that address here, or choose your own at random:
+// fill in MAC address here, or choose your own at random:
 const static byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
-static char ssid[] = "ssid_name"; // your network SSID (name)
-static char pass[] = "password";  // your network password
-//static int keyIndex = 0;        // your network key Index number (needed only for WEP)
+static char ssid[] = "your-wifi-network";  // your network SSID (name)
+static char pass[] = "your-wifi-password"; // your network password
 
 const static char pubkey[] = "demo";
 const static char subkey[] = "demo";
 const static char channel[] = "hello_world";
 
+
 void setup()
 {
     Serial.begin(115200);
     Serial.println("Serial set up");
+    /* In this scatch demo all input pins are 'floating' */
+    pinMode(ANALOG_INPUT_PIN_0, INPUT);
+    /* Only one analog input pin for ESP8266 */
+#if !defined(ARDUINO_ARCH_ESP8266)
+    pinMode(ANALOG_INPUT_PIN_0 + 1, INPUT);
+    pinMode(ANALOG_INPUT_PIN_0 + 2, INPUT);
+#endif
 
-#if defined(ARDUINO_ARCH_ESP32)
     // attempt to connect using WPA2 encryption:
     Serial.println("Attempting to connect to WPA network...");  
     WiFi.begin(ssid, pass);
@@ -65,23 +76,6 @@ void setup()
         delay(500);
         Serial.println("Connecting to WiFi..");
     }
-#else
-    int status;
-
-    if (WiFi.status() == WL_NO_SHIELD) {
-        Serial.println("WiFi shield not present");
-        while(true); // stop
-    }
-    // attempt to connect to Wifi network:
-    do {
-        Serial.print("WiFi connecting to SSID: ");
-        Serial.println(ssid);
-        // Connect to the network. Uncomment whichever line is right for you:
-        //status = WiFi.begin(ssid); // open network
-        //status = WiFi.begin(ssid, keyIndex, key); // WEP network
-        status = WiFi.begin(ssid, pass); // WPA / WPA2 Personal network
-    } while (status != WL_CONNECTED);
-#endif /* defined(ARDUINO_ARCH_ESP32) */
     Serial.println("WiFi set up");
     Serial.print("WL_CONNECTED=");
     Serial.println(WL_CONNECTED);
@@ -99,8 +93,8 @@ JsonObject createMessage(JsonDocument jd)
     sender["mac_last_byte"] = mac[5];
 
     JsonArray analog = msg.createNestedArray("analog");
-    for (int i = 0; i < 6; i++) {
-        analog.add(analogRead(i));
+    for (int i = 0; i < NUM_ANALOG_INPUT_PINS; i++) {
+        analog.add(analogRead(ANALOG_INPUT_PIN_0 + i));
     }
 
     return msg;
@@ -160,19 +154,19 @@ void dumpMessage(Stream& s, JsonArray response)
         }
         s.print(sender["mac_last_byte"].as<int>(), DEC);
 
-        s.print(" A2: ");
+        s.print(" A0: ");
         JsonArray analog = obj["analog"];
         if (analog.isNull()) {
             s.println("analog not acquired");
             delay(1000);
             return;
         }
-        if (analog.size() < 3) {
-            s.println("analog[2] not acquired");
+        if (analog.size() < 1) {
+            s.println("analog[0] not acquired");
             delay(1000);
             return;
         }
-        s.print(analog[2].as<int>(), DEC);
+        s.print(analog[0].as<int>(), DEC);
 
         s.println();
     }
