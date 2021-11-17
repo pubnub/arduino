@@ -7,7 +7,13 @@ message passing system using any network hardware (chip/shield) that
 has a class compatible with Arduino de facto standard `Client`. Your 
 application can receive (subscribe to) and send (publish) messages.
 
+## Full documentation
+
+Full detailed documentation of PubNub Arduino SDK can be found here:
+ [https://www.pubnub.com/docs/sdks/arduino](https://www.pubnub.com/docs/sdks/arduino
+
 ## Copy-and-Paste-Ready Code!
+
 See how easy it is to [Publish](examples/PubNubPublisher) 
 and [Subscribe](examples/PubNubSubscriber)!
 
