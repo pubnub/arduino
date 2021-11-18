@@ -9,8 +9,7 @@ application can receive (subscribe to) and send (publish) messages.
 
 ## Full documentation
 
-Full detailed documentation of PubNub Arduino SDK can be found here:
- [https://www.pubnub.com/docs/sdks/arduino](https://www.pubnub.com/docs/sdks/arduino
+For more information on Arduino, refer to the [PubNub Arduino SDK documentation](https://www.pubnub.com/docs/sdks/arduino).
 
 ## Copy-and-Paste-Ready Code!
 
